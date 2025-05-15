@@ -38,6 +38,11 @@ const Game = () => {
   const [selectedCell, setSelectedCell] = useState<HTMLButtonElement | null>(
     null
   );
+  const [timer, setTimer] = useState(0);
+  const [gameFinished, setGameFinished] = useState(true);
+  const [timeStarted, setTimeStarted] = useState<Date | null>(null);
+  const [timeFinished, setTimeFinished] = useState<Date | null>(null);
+
   const handleCellClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (selectedCell) {
       selectedCell.removeAttribute("selected");
@@ -46,10 +51,6 @@ const Game = () => {
     e.currentTarget.setAttribute("selected", "");
   };
 
-  const [timer, setTimer] = useState(0);
-  const [gameFinished, setGameFinished] = useState(true);
-  const [timeStarted, setTimeStarted] = useState<Date | null>(null);
-  const [timeFinished, setTimeFinished] = useState<Date | null>(null);
   const handleGameFinish = () => {
     setTimeFinished(new Date());
     setGameFinished(true);
