@@ -1,7 +1,40 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./Game.css";
 
 const Game = () => {
+  const testData = {
+    newboard: {
+      grids: [
+        {
+          value: [
+            [8, 0, 0, 6, 2, 7, 5, 9, 3],
+            [2, 5, 0, 4, 0, 9, 0, 0, 6],
+            [0, 0, 7, 0, 0, 0, 4, 0, 0],
+            [1, 0, 5, 3, 8, 6, 0, 4, 2],
+            [6, 0, 2, 9, 0, 0, 1, 0, 8],
+            [4, 0, 0, 0, 7, 2, 0, 0, 0],
+            [5, 0, 4, 8, 0, 0, 0, 0, 0],
+            [7, 1, 0, 0, 0, 0, 0, 0, 0],
+            [0, 2, 6, 0, 0, 1, 8, 0, 0],
+          ],
+          solution: [
+            [8, 4, 1, 6, 2, 7, 5, 9, 3],
+            [2, 5, 3, 4, 1, 9, 7, 8, 6],
+            [9, 6, 7, 5, 3, 8, 4, 2, 1],
+            [1, 7, 5, 3, 8, 6, 9, 4, 2],
+            [6, 3, 2, 9, 4, 5, 1, 7, 8],
+            [4, 8, 9, 1, 7, 2, 3, 6, 5],
+            [5, 9, 4, 8, 6, 3, 2, 1, 7],
+            [7, 1, 8, 2, 5, 4, 6, 3, 9],
+            [3, 2, 6, 7, 9, 1, 8, 5, 4],
+          ],
+          difficulty: "Medium",
+        },
+      ],
+      results: 1,
+      message: "All Ok",
+    },
+  };
   const [selectedCell, setSelectedCell] = useState<HTMLButtonElement | null>(
     null
   );
@@ -11,15 +44,72 @@ const Game = () => {
     }
     setSelectedCell(e.currentTarget);
     e.currentTarget.setAttribute("selected", "");
-    console.log(
-      `Cell ${
-        (e.currentTarget.parentNode?.parentNode as HTMLElement)?.dataset.index
-      } inner cell ${e.currentTarget.dataset.index} clicked`
-    );
+  };
+
+  const [timer, setTimer] = useState(0);
+  const [gameFinished, setGameFinished] = useState(true);
+  const [timeStarted, setTimeStarted] = useState<Date | null>(null);
+  const [timeFinished, setTimeFinished] = useState<Date | null>(null);
+  const handleGameFinish = () => {
+    setTimeFinished(new Date());
+    setGameFinished(true);
+  };
+
+  const handleGameStart = () => {
+    setTimeStarted(new Date());
+    setTimeFinished(null);
+    setGameFinished(false);
+    setTimer(0);
+    fillGrid(testData.newboard.grids[0].value);
+  };
+
+  const formatTime = (time: number) => {
+    const minutes = Math.floor(time / 60)
+      .toString()
+      .padStart(2, "0");
+    const seconds = (time % 60).toString().padStart(2, "0");
+    return `${minutes}:${seconds}`;
+  };
+
+  useEffect(() => {
+    if (!gameFinished) {
+      const interval = setInterval(() => {
+        setTimer((prevTimer) => prevTimer + 1);
+      }, 1000);
+
+      return () => clearInterval(interval);
+    }
+  }, [gameFinished]);
+
+  const fillGrid = (grid: number[][]) => {
+    const cells = document.querySelectorAll(".cell");
+    cells.forEach((cell, index) => {
+      const innerCells = cell.querySelectorAll(".inner-cell");
+      innerCells.forEach((innerCell, innerIndex) => {
+        const row = Math.floor(index / 3) * 3 + Math.floor(innerIndex / 3);
+        const col = (index % 3) * 3 + (innerIndex % 3);
+        const value = grid[row][col];
+        if (value !== 0) {
+          innerCell.children[0].setAttribute("data-locked", "");
+          innerCell.children[0].innerHTML = value.toString();
+        } else {
+          innerCell.children[0].innerHTML = "";
+        }
+      });
+    });
   };
 
   return (
     <div className="game">
+      <div className="timer">
+        <p className="timer-display">{formatTime(timer)}</p>
+        <button className="start-button" onClick={handleGameStart}>
+          Start
+        </button>
+        <button className="finish-button" onClick={handleGameFinish}>
+          Finish
+        </button>
+      </div>
       <div className="game-board">
         {Array.from({ length: 9 }, (_, cellIndex) => (
           <div
@@ -57,9 +147,7 @@ const Game = () => {
                   className="cell-button"
                   onClick={handleCellClick}
                   data-index={innerCellIndex + 1}
-                >
-                  {innerCellIndex + 1}
-                </button>
+                ></button>
               </div>
             ))}
           </div>
@@ -73,7 +161,7 @@ const Game = () => {
               key={`input-${index}`}
               className="input-button"
               onClick={() => {
-                if (selectedCell) {
+                if (selectedCell && !selectedCell.hasAttribute("data-locked")) {
                   selectedCell.innerText = (index + 1).toString();
                 }
               }}
@@ -82,16 +170,26 @@ const Game = () => {
             </button>
           ))}
         </div>
-        <button
-          className="input-button"
-          onClick={() => {
-            if (selectedCell) {
-              selectedCell.innerText = "";
-            }
-          }}
-        >
-          Clear
-        </button>
+        <div>
+          <button
+            className="input-button"
+            onClick={() => {
+              if (selectedCell && !selectedCell.hasAttribute("data-locked")) {
+                selectedCell.innerText = "";
+              }
+            }}
+          >
+            Clear
+          </button>
+          <button
+            className="input-button"
+            onClick={() => {
+              fillGrid(testData.newboard.grids[0].value);
+            }}
+          >
+            Reset
+          </button>
+        </div>
       </div>
     </div>
   );

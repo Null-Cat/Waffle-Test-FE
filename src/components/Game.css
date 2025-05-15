@@ -45,6 +45,11 @@
   background-color: var(--color-tone-6);
   border: none;
   cursor: pointer;
+  color: var(--blue);
+}
+
+.cell-button[data-locked] {
+  color: black;
 }
 
 .cell-button[selected] {
@@ -71,4 +76,16 @@
 
 .input-button:hover {
   background-color: var(--color-tone-5);
+}
+
+.timer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.timer-display {
+  font-size: var(--font-size);
+  font-family: var(--title-font);
+  margin: 0;
 }

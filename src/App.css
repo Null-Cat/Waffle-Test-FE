@@ -26,8 +26,8 @@
   --tile-font-weight: var(--title-font-weight);
 }
 
-.container:nth-child(2) {
-  right: 0;
+body {
+  background-color: var(--color-tone-5);
 }
 
 .container {
@@ -40,6 +40,10 @@
   display: -ms-flexbox;
   display: flex;
   position: absolute;
+}
+
+.container:nth-child(2) {
+  right: 0;
 }
 
 .centre {
@@ -60,7 +64,7 @@
   background-color: var(--color-tone-7);
   -ms-flex-positive: 1;
   flex-grow: 1;
-  /* height: 1px; */
+  height: 100vw;
   position: relative;
 }
 
