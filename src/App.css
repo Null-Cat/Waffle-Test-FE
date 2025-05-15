@@ -12,10 +12,10 @@
   --easing: cubic-bezier(0.19, 1, 0.22, 1);
   --easing2: cubic-bezier(0.5, 0, 0, 1);
   --orange: #f5793a;
-  --blue: #509ce5;
+  --blue: rgb(0, 164, 219);
   --game-width: 728px;
   --font-size: 20px;
-  --board-size: 550px;
+  --board-size: 650px;
   --tile-font-size: 2rem;
   --header-height: 72px;
   --info-height: 90px;
