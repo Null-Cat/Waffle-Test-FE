@@ -30,22 +30,6 @@ body {
   background-color: var(--color-tone-5);
 }
 
-.container {
-  width: calc((100vw - var(--game-width)) / 2);
-  -ms-flex-pack: center;
-  justify-content: center;
-  -ms-flex-align: center;
-  align-items: center;
-  height: 100vh;
-  display: -ms-flexbox;
-  display: flex;
-  position: absolute;
-}
-
-.container:nth-child(2) {
-  right: 0;
-}
-
 .centre {
   -ms-flex-direction: column;
   flex-direction: column;
@@ -53,10 +37,8 @@ body {
   align-items: center;
   max-width: 100%;
   height: 100%;
-  margin: 0 auto;
   display: -ms-flexbox;
   display: flex;
-  position: relative;
   overflow: hidden;
 }
 
@@ -64,7 +46,7 @@ body {
   background-color: var(--color-tone-7);
   -ms-flex-positive: 1;
   flex-grow: 1;
-  height: 100vw;
+  height: 100vh;
   position: relative;
 }
 
