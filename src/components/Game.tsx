@@ -1,7 +1,16 @@
+import { useState } from "react";
 import "./Game.css";
 
 const Game = () => {
+  const [selectedCell, setSelectedCell] = useState<HTMLButtonElement | null>(
+    null
+  );
   const handleCellClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (selectedCell) {
+      selectedCell.removeAttribute("selected");
+    }
+    setSelectedCell(e.currentTarget);
+    e.currentTarget.setAttribute("selected", "");
     console.log(
       `Cell ${
         (e.currentTarget.parentNode?.parentNode as HTMLElement)?.dataset.index
@@ -15,6 +24,7 @@ const Game = () => {
         {Array.from({ length: 9 }, (_, cellIndex) => (
           <div
             className="cell"
+            key={`cell-${cellIndex}`}
             data-index={cellIndex + 1}
             style={{
               // Equal borders for all cells
@@ -27,6 +37,7 @@ const Game = () => {
             {Array.from({ length: 9 }, (_, innerCellIndex) => (
               <div
                 className="inner-cell"
+                key={`inner-cell-${cellIndex}-${innerCellIndex}`}
                 data-index={innerCellIndex + 1}
                 style={{
                   // Equal borders for all inner cells
@@ -53,6 +64,34 @@ const Game = () => {
             ))}
           </div>
         ))}
+      </div>
+
+      <div className="game-inputs">
+        <div className="game-inputs-row">
+          {Array.from({ length: 9 }, (_, index) => (
+            <button
+              key={`input-${index}`}
+              className="input-button"
+              onClick={() => {
+                if (selectedCell) {
+                  selectedCell.innerText = (index + 1).toString();
+                }
+              }}
+            >
+              {index + 1}
+            </button>
+          ))}
+        </div>
+        <button
+          className="input-button"
+          onClick={() => {
+            if (selectedCell) {
+              selectedCell.innerText = "";
+            }
+          }}
+        >
+          Clear
+        </button>
       </div>
     </div>
   );
