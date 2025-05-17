@@ -126,22 +126,8 @@ const Game = () => {
     }
 
     // Highlight the row and column inner cells
-    const parentCellIndex =
-      parseInt(
-        innerCellToSelect.parentElement?.parentElement?.getAttribute(
-          "data-index"
-        ) || "0"
-      ) - 1;
-    const innerCellIndex =
-      parseInt(innerCellToSelect.getAttribute("data-index") || "0") - 1;
-
-    const parentRow = Math.floor(parentCellIndex / 3);
-    const parentCol = parentCellIndex % 3;
-    const innerRow = Math.floor(innerCellIndex / 3);
-    const innerCol = innerCellIndex % 3;
-
-    const innerRowIndex = parentRow * 3 + innerRow;
-    const innerColIndex = parentCol * 3 + innerCol;
+    const { parentCellIndex, innerRowIndex, innerColIndex } =
+      getCellPosition(innerCellToSelect);
 
     cells.forEach((cell, cellIndex) => {
       if (cellIndex === parentCellIndex) return;
@@ -175,6 +161,80 @@ const Game = () => {
       });
     }
 
+    // Check if errors need to be cleared
+    document
+      .querySelectorAll("[selected][error], [selected-related][error]")
+      .forEach((errorCell) => {
+        const cellValue = errorCell.innerHTML;
+
+        if (!cellValue) {
+          errorCell.removeAttribute("error");
+          return;
+        }
+        const { innerRowIndex: cellRow, innerColIndex: cellCol } =
+          getCellPosition(errorCell as HTMLElement);
+
+        if (cellRow === -1 || cellCol === -1) return;
+
+        const board = getBoardState();
+        const cellValueInt = parseInt(cellValue);
+
+        let hasDuplicate = false;
+
+        // Check row
+        for (let rowIndex = 0; rowIndex < 9 && !hasDuplicate; rowIndex++) {
+          if (
+            rowIndex !== cellCol &&
+            board[cellRow][rowIndex] === cellValueInt
+          ) {
+            hasDuplicate = true;
+          }
+        }
+
+        // Check column
+        for (
+          let columnIndex = 0;
+          columnIndex < 9 && !hasDuplicate;
+          columnIndex++
+        ) {
+          if (
+            columnIndex !== cellRow &&
+            board[columnIndex][cellCol] === cellValueInt
+          ) {
+            hasDuplicate = true;
+          }
+        }
+
+        // Check 3x3 box
+        const boxStartRow = Math.floor(cellRow / 3) * 3;
+        const boxStartCol = Math.floor(cellCol / 3) * 3;
+
+        for (
+          let rowIndex = boxStartRow;
+          rowIndex < boxStartRow + 3 && !hasDuplicate;
+          rowIndex++
+        ) {
+          for (
+            let columnIndex = boxStartCol;
+            columnIndex < boxStartCol + 3 && !hasDuplicate;
+            columnIndex++
+          ) {
+            if (
+              (rowIndex !== cellRow || columnIndex !== cellCol) &&
+              board[rowIndex][columnIndex] === cellValueInt
+            ) {
+              hasDuplicate = true;
+            }
+          }
+        }
+
+        // If no duplicated numbers, remove the error attribute
+        if (!hasDuplicate) {
+          errorCell.removeAttribute("error");
+        }
+      });
+
+    // Highlight Same Number in the same cell aka Errors
     const highlightedCellNumbers = Array.from(
       document.querySelectorAll("[selected], [selected-related]")
     )
@@ -192,6 +252,33 @@ const Game = () => {
         }
       });
     }
+  };
+
+  const getCellPosition = (cell: HTMLElement) => {
+    const parentCellIndex =
+      parseInt(
+        cell.parentElement?.parentElement?.getAttribute("data-index") || "0"
+      ) - 1;
+    const innerCellIndex = parseInt(cell.getAttribute("data-index") || "0") - 1;
+
+    const parentRow = Math.floor(parentCellIndex / 3);
+    const parentCol = parentCellIndex % 3;
+    const innerRow = Math.floor(innerCellIndex / 3);
+    const innerCol = innerCellIndex % 3;
+
+    const innerRowIndex = parentRow * 3 + innerRow;
+    const innerColIndex = parentCol * 3 + innerCol;
+
+    return {
+      parentCellIndex,
+      innerCellIndex,
+      parentRow,
+      parentCol,
+      innerRow,
+      innerCol,
+      innerRowIndex,
+      innerColIndex,
+    };
   };
 
   const clearBoardHighlighting = (clearError: boolean = false) => {
@@ -215,22 +302,41 @@ const Game = () => {
     return `${minutes}:${seconds}`;
   };
 
-  const fillGrid = (grid: number[][]) => {
+  const traverseBoard = (
+    callback: (innerButton: HTMLButtonElement, row: number, col: number) => void
+  ) => {
     const cells = document.querySelectorAll(".cell");
     cells.forEach((cell, index) => {
       const innerCells = cell.querySelectorAll(".inner-cell");
       innerCells.forEach((innerCell, innerIndex) => {
         const row = Math.floor(index / 3) * 3 + Math.floor(innerIndex / 3);
         const col = (index % 3) * 3 + (innerIndex % 3);
-        const value = grid[row][col];
-        if (value !== 0) {
-          innerCell.children[0].setAttribute("data-locked", "");
-          innerCell.children[0].innerHTML = value.toString();
-        } else {
-          innerCell.children[0].innerHTML = "";
-        }
+        callback(innerCell.children[0] as HTMLButtonElement, row, col);
       });
     });
+  };
+
+  const fillGrid = (grid: number[][]) => {
+    traverseBoard((innerButton, row, col) => {
+      const value = grid[row][col];
+      if (value !== 0) {
+        innerButton.setAttribute("data-locked", "");
+        innerButton.innerHTML = value.toString();
+      } else {
+        innerButton.innerHTML = "";
+      }
+    });
+  };
+
+  const getBoardState = () => {
+    const boardState: number[][] = Array.from({ length: 9 }, () =>
+      Array(9).fill(0)
+    );
+    traverseBoard((innerButton, row, col) => {
+      const value = parseInt(innerButton.innerHTML || "0");
+      boardState[row][col] = value;
+    });
+    return boardState;
   };
 
   useEffect(() => {
