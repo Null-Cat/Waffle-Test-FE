@@ -12,10 +12,10 @@
   --easing: cubic-bezier(0.19, 1, 0.22, 1);
   --easing2: cubic-bezier(0.5, 0, 0, 1);
   --orange: #f5793a;
-  --blue: rgb(0, 164, 219);
+  --blue: #003bb9;
   --game-width: 728px;
   --font-size: 20px;
-  --board-size: 650px;
+  --board-size: 600px;
   --tile-font-size: 2rem;
   --header-height: 72px;
   --info-height: 90px;
@@ -54,27 +54,4 @@ body {
   width: var(--game-width);
   max-width: 100%;
   overflow: hidden;
-}
-
-.header {
-  font-size: var(--font-size);
-  font-family: var(--title-font);
-  font-weight: var(--title-font-weight);
-  height: var(--header-height);
-  line-height: var(--header-height);
-  width: 100%;
-  text-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  justify-content: center;
-  display: -ms-flexbox;
-  display: flex;
-}
-
-.title {
-  font-size: 1.4rem;
-  font-family: var(--title-font);
-  font-weight: 900;
-  text-align: center;
-  margin: 0;
 }
