@@ -85,7 +85,7 @@ const Game = () => {
           ...prevHistory,
           { cell: selectedCell, value: previousValue },
         ]);
-        selectedCell.innerText = number.toString();
+        selectedCell.innerText = number === 0 ? "" : number.toString();
       }
       selectInnerCell(selectedCell);
     }
@@ -323,7 +323,7 @@ const Game = () => {
             className="input-button button-erase"
             onClick={() => {
               if (selectedCell && !selectedCell.hasAttribute("data-locked")) {
-                selectedCell.innerText = "";
+                handleNumberInput(0);
               }
             }}
           >
