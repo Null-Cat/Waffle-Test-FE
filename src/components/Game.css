@@ -81,6 +81,8 @@
   background-color: var(--color-tone-6);
   cursor: pointer;
   transition: all 0.2s var(--easing);
+  color: var(--blue);
+  fill: var(--blue);
 }
 
 .input-button:active {
@@ -90,10 +92,6 @@
 
 .input-button:hover {
   background-color: var(--color-tone-5);
-}
-
-.button-number {
-  color: var(--blue);
 }
 
 .game-inputs {
