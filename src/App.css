@@ -45,7 +45,6 @@ body {
 .app {
   background-color: var(--color-tone-7);
   -ms-flex-positive: 1;
-  flex-grow: 1;
   height: 100vh;
   position: relative;
 }

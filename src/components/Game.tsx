@@ -13,6 +13,7 @@ interface SolveAPIResponse {
 }
 
 const Game = () => {
+  const [boardID, setBoardID] = useState<number>(0);
   const [unsolvedBoard, setUnsolvedBoard] = useState<number[][]>([]);
   const [selectedCell, setSelectedCell] = useState<HTMLButtonElement | null>(
     null
@@ -73,6 +74,7 @@ const Game = () => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
+        boardID: boardID,
         board: getBoardState(),
       }),
     })
@@ -99,11 +101,15 @@ const Game = () => {
     setGameFinished(false);
     setTimer(0);
     setActionHistory([]);
-    fetch("http://localhost:3000/board")
+    const url = new URL("http://localhost:3000/board");
+    url.searchParams.append("difficulty", "MEDIUM");
+
+    fetch(url)
       .then((response) => response.json())
       .then((data) => {
-        setUnsolvedBoard(data.newboard.grids[0].value);
-        fillGrid(data.newboard.grids[0].value);
+        setBoardID(data.id);
+        setUnsolvedBoard(data.value);
+        fillGrid(data.value);
       })
       .catch((error) => {
         console.error("Error fetching board:", error);
