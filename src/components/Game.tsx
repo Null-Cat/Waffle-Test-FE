@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
 import "./Game.css";
 
+interface PlayerAction {
+  cell: HTMLButtonElement;
+  value: number | null;
+}
+
 const Game = () => {
   const testData = {
     newboard: {
@@ -38,87 +43,50 @@ const Game = () => {
   const [selectedCell, setSelectedCell] = useState<HTMLButtonElement | null>(
     null
   );
+  const [actionHistory, setActionHistory] = useState<PlayerAction[]>([]);
   const [timer, setTimer] = useState(0);
   const [gameFinished, setGameFinished] = useState(true);
   const [timeStarted, setTimeStarted] = useState<Date | null>(null);
   const [timeFinished, setTimeFinished] = useState<Date | null>(null);
 
   const handleCellClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    setSelectedCell(e.currentTarget);
+    selectInnerCell(e.currentTarget);
+  };
 
-    const cells = document.querySelectorAll(".cell");
-    // Remove Previous Highlighting
-    if (selectedCell) {
-      selectedCell.removeAttribute("selected");
-      Array.from(cells).forEach((cell) => {
-        const innerCells = cell.querySelectorAll(".inner-cell");
-        innerCells.forEach((innerCell) => {
-          innerCell.children[0].removeAttribute("selected-related");
-          innerCell.children[0].removeAttribute("selected-related-number");
-        });
-      });
-    }
+  const handleUndoAction = () => {
+    if (actionHistory.length > 0) {
+      const lastAction = actionHistory[actionHistory.length - 1];
+      const cell = lastAction.cell;
+      const value = lastAction.value;
 
-    // Highlight the selected cell
-    e.currentTarget.setAttribute("selected", "");
-
-    // Highlight the parent cell
-    const parentCell = e.currentTarget.parentElement?.parentElement;
-    if (parentCell) {
-      Array.from(parentCell.children).forEach((innerCell: Element) => {
-        if (innerCell === e.currentTarget.parentElement) return;
-        innerCell.children[0].setAttribute("selected-related", "");
-      });
-    }
-
-    // Highlight the row and column inner cells
-    const parentCellIndex =
-      parseInt(
-        e.currentTarget.parentElement?.parentElement?.getAttribute(
-          "data-index"
-        ) || "0"
-      ) - 1;
-    const innerCellIndex =
-      parseInt(e.currentTarget.getAttribute("data-index") || "0") - 1;
-
-    const parentRow = Math.floor(parentCellIndex / 3);
-    const parentCol = parentCellIndex % 3;
-    const innerRow = Math.floor(innerCellIndex / 3);
-    const innerCol = innerCellIndex % 3;
-
-    const innerRowIndex = parentRow * 3 + innerRow;
-    const innerColIndex = parentCol * 3 + innerCol;
-
-    cells.forEach((cell, cellIndex) => {
-      if (cellIndex === parentCellIndex) return;
-
-      const innerCells = cell.querySelectorAll(".inner-cell");
-      innerCells.forEach((innerCell, innerCellIndex) => {
-        if (innerCell.children[0] === e.currentTarget) return;
-
-        const row =
-          Math.floor(cellIndex / 3) * 3 + Math.floor(innerCellIndex / 3);
-        const col = (cellIndex % 3) * 3 + (innerCellIndex % 3);
-
-        if (row === innerRowIndex || col === innerColIndex) {
-          innerCell.children[0].setAttribute("selected-related", "");
+      if (cell && !cell.hasAttribute("data-locked")) {
+        cell.innerText = value ? value.toString() : "";
+        setActionHistory((prevHistory) => prevHistory.slice(0, -1));
+        cell.removeAttribute("error");
+        if (actionHistory[actionHistory.length - 2]) {
+          selectInnerCell(actionHistory[actionHistory.length - 2].cell);
+        } else {
+          clearBoardHighlighting(true);
+          setSelectedCell(null);
         }
-      });
-    });
+      }
+    }
+  };
 
-    // Highlight Same Number
-    if (e.currentTarget.innerText) {
-      const selectedValue = e.currentTarget.innerText;
-      cells.forEach((cell) => {
-        const innerCells = cell.querySelectorAll(".inner-cell");
-        innerCells.forEach((innerCell) => {
-          if (innerCell.children[0] !== e.currentTarget) {
-            if (innerCell.children[0].innerHTML === selectedValue) {
-              innerCell.children[0].setAttribute("selected-related-number", "");
-            }
-          }
-        });
-      });
+  const handleNumberInput = (number: number) => {
+    if (selectedCell && !selectedCell.hasAttribute("data-locked")) {
+      const previousValue = selectedCell.innerText
+        ? parseInt(selectedCell.innerText)
+        : null;
+
+      if (previousValue !== number) {
+        setActionHistory((prevHistory) => [
+          ...prevHistory,
+          { cell: selectedCell, value: previousValue },
+        ]);
+        selectedCell.innerText = number.toString();
+      }
+      selectInnerCell(selectedCell);
     }
   };
 
@@ -135,6 +103,109 @@ const Game = () => {
     fillGrid(testData.newboard.grids[0].value);
   };
 
+  const selectInnerCell = (innerCellToSelect: HTMLButtonElement) => {
+    setSelectedCell(innerCellToSelect);
+
+    const cells = document.querySelectorAll(".cell");
+    // Remove Previous Highlighting
+    if (selectedCell) {
+      clearBoardHighlighting();
+    }
+
+    // Highlight the selected cell
+    innerCellToSelect.setAttribute("selected", "");
+
+    // Highlight the parent cell
+    const parentCell = innerCellToSelect.parentElement?.parentElement;
+    if (parentCell) {
+      Array.from(parentCell.children).forEach((innerCell: Element) => {
+        if (innerCell === innerCellToSelect.parentElement) return;
+        innerCell.children[0].setAttribute("selected-related", "");
+      });
+    }
+
+    // Highlight the row and column inner cells
+    const parentCellIndex =
+      parseInt(
+        innerCellToSelect.parentElement?.parentElement?.getAttribute(
+          "data-index"
+        ) || "0"
+      ) - 1;
+    const innerCellIndex =
+      parseInt(innerCellToSelect.getAttribute("data-index") || "0") - 1;
+
+    const parentRow = Math.floor(parentCellIndex / 3);
+    const parentCol = parentCellIndex % 3;
+    const innerRow = Math.floor(innerCellIndex / 3);
+    const innerCol = innerCellIndex % 3;
+
+    const innerRowIndex = parentRow * 3 + innerRow;
+    const innerColIndex = parentCol * 3 + innerCol;
+
+    cells.forEach((cell, cellIndex) => {
+      if (cellIndex === parentCellIndex) return;
+
+      const innerCells = cell.querySelectorAll(".inner-cell");
+      innerCells.forEach((innerCell, innerCellIndex) => {
+        if (innerCell.children[0] === innerCellToSelect) return;
+
+        const row =
+          Math.floor(cellIndex / 3) * 3 + Math.floor(innerCellIndex / 3);
+        const col = (cellIndex % 3) * 3 + (innerCellIndex % 3);
+
+        if (row === innerRowIndex || col === innerColIndex) {
+          innerCell.children[0].setAttribute("selected-related", "");
+        }
+      });
+    });
+
+    // Highlight Same Number
+    if (innerCellToSelect.innerText) {
+      const selectedValue = innerCellToSelect.innerText;
+      cells.forEach((cell) => {
+        const innerCells = cell.querySelectorAll(".inner-cell");
+        innerCells.forEach((innerCell) => {
+          if (innerCell.children[0] !== innerCellToSelect) {
+            if (innerCell.children[0].innerHTML === selectedValue) {
+              innerCell.children[0].setAttribute("selected-related-number", "");
+            }
+          }
+        });
+      });
+    }
+
+    const highlightedCellNumbers = Array.from(
+      document.querySelectorAll("[selected], [selected-related]")
+    )
+      .map((cell) => {
+        if (cell === innerCellToSelect) return "";
+        return cell.innerHTML;
+      })
+      .filter((cell) => cell);
+    if (highlightedCellNumbers.includes(innerCellToSelect.innerHTML)) {
+      Array.from(
+        document.querySelectorAll("[selected], [selected-related]")
+      ).forEach((cell) => {
+        if (cell.innerHTML === innerCellToSelect.innerHTML) {
+          cell.setAttribute("error", "");
+        }
+      });
+    }
+  };
+
+  const clearBoardHighlighting = (clearError: boolean = false) => {
+    const cells = document.querySelectorAll(".cell");
+    Array.from(cells).forEach((cell) => {
+      const innerCells = cell.querySelectorAll(".inner-cell");
+      innerCells.forEach((innerCell) => {
+        innerCell.children[0].removeAttribute("selected");
+        innerCell.children[0].removeAttribute("selected-related");
+        innerCell.children[0].removeAttribute("selected-related-number");
+        if (clearError) innerCell.children[0].removeAttribute("error");
+      });
+    });
+  };
+
   const formatTime = (time: number) => {
     const minutes = Math.floor(time / 60)
       .toString()
@@ -142,16 +213,6 @@ const Game = () => {
     const seconds = (time % 60).toString().padStart(2, "0");
     return `${minutes}:${seconds}`;
   };
-
-  useEffect(() => {
-    if (!gameFinished) {
-      const interval = setInterval(() => {
-        setTimer((prevTimer) => prevTimer + 1);
-      }, 1000);
-
-      return () => clearInterval(interval);
-    }
-  }, [gameFinished]);
 
   const fillGrid = (grid: number[][]) => {
     const cells = document.querySelectorAll(".cell");
@@ -170,6 +231,16 @@ const Game = () => {
       });
     });
   };
+
+  useEffect(() => {
+    if (!gameFinished) {
+      const interval = setInterval(() => {
+        setTimer((prevTimer) => prevTimer + 1);
+      }, 1000);
+
+      return () => clearInterval(interval);
+    }
+  }, [gameFinished]);
 
   return (
     <div className="game">
@@ -232,11 +303,7 @@ const Game = () => {
             <button
               key={`input-${index}`}
               className="input-button"
-              onClick={() => {
-                if (selectedCell && !selectedCell.hasAttribute("data-locked")) {
-                  selectedCell.innerText = (index + 1).toString();
-                }
-              }}
+              onClick={() => handleNumberInput(index + 1)}
             >
               {index + 1}
             </button>
@@ -257,9 +324,15 @@ const Game = () => {
             className="input-button"
             onClick={() => {
               fillGrid(testData.newboard.grids[0].value);
+              clearBoardHighlighting(true);
+              setActionHistory([]);
+              setSelectedCell(null);
             }}
           >
             Reset
+          </button>
+          <button className="input-button" onClick={handleUndoAction}>
+            Undo
           </button>
         </div>
       </div>
