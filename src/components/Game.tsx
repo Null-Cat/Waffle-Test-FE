@@ -7,40 +7,13 @@ interface PlayerAction {
   value: number | null;
 }
 
+interface SolveAPIResponse {
+  message: string;
+  board: number[][] | null;
+}
+
 const Game = () => {
-  const testData = {
-    newboard: {
-      grids: [
-        {
-          value: [
-            [8, 0, 0, 6, 2, 7, 5, 9, 3],
-            [2, 5, 0, 4, 0, 9, 0, 0, 6],
-            [0, 0, 7, 0, 0, 0, 4, 0, 0],
-            [1, 0, 5, 3, 8, 6, 0, 4, 2],
-            [6, 0, 2, 9, 0, 0, 1, 0, 8],
-            [4, 0, 0, 0, 7, 2, 0, 0, 0],
-            [5, 0, 4, 8, 0, 0, 0, 0, 0],
-            [7, 1, 0, 0, 0, 0, 0, 0, 0],
-            [0, 2, 6, 0, 0, 1, 8, 0, 0],
-          ],
-          solution: [
-            [8, 4, 1, 6, 2, 7, 5, 9, 3],
-            [2, 5, 3, 4, 1, 9, 7, 8, 6],
-            [9, 6, 7, 5, 3, 8, 4, 2, 1],
-            [1, 7, 5, 3, 8, 6, 9, 4, 2],
-            [6, 3, 2, 9, 4, 5, 1, 7, 8],
-            [4, 8, 9, 1, 7, 2, 3, 6, 5],
-            [5, 9, 4, 8, 6, 3, 2, 1, 7],
-            [7, 1, 8, 2, 5, 4, 6, 3, 9],
-            [3, 2, 6, 7, 9, 1, 8, 5, 4],
-          ],
-          difficulty: "Medium",
-        },
-      ],
-      results: 1,
-      message: "All Ok",
-    },
-  };
+  const [unsolvedBoard, setUnsolvedBoard] = useState<number[][]>([]);
   const [selectedCell, setSelectedCell] = useState<HTMLButtonElement | null>(
     null
   );
@@ -94,6 +67,30 @@ const Game = () => {
   const handleGameFinish = () => {
     setTimeFinished(new Date());
     setGameFinished(true);
+    fetch("http://localhost:3000/solved", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        board: getBoardState(),
+      }),
+    })
+      .then((response) => {
+        if (response.ok) {
+          console.log("Board has been solved");
+          return;
+        }
+        return response.json();
+      })
+      .then((responseJSON: SolveAPIResponse) => {
+        if (responseJSON && responseJSON.message === "Board not solved") {
+          console.error("Board not solved");
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
   };
 
   const handleGameStart = () => {
@@ -101,7 +98,16 @@ const Game = () => {
     setTimeFinished(null);
     setGameFinished(false);
     setTimer(0);
-    fillGrid(testData.newboard.grids[0].value);
+    setActionHistory([]);
+    fetch("http://localhost:3000/board")
+      .then((response) => response.json())
+      .then((data) => {
+        setUnsolvedBoard(data.newboard.grids[0].value);
+        fillGrid(data.newboard.grids[0].value);
+      })
+      .catch((error) => {
+        console.error("Error fetching board:", error);
+      });
   };
 
   const selectInnerCell = (innerCellToSelect: HTMLButtonElement) => {
@@ -349,6 +355,65 @@ const Game = () => {
     }
   }, [gameFinished]);
 
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const key = event.key;
+      if (key >= "1" && key <= "9") {
+        handleNumberInput(parseInt(key));
+      } else if (key === "Backspace" || key === "Delete") {
+        handleNumberInput(0);
+      } else if (key === "z" && (event.ctrlKey || event.metaKey)) {
+        handleUndoAction();
+      } else if (
+        key === "ArrowUp" ||
+        key === "ArrowDown" ||
+        key === "ArrowLeft" ||
+        key === "ArrowRight"
+      ) {
+        event.preventDefault();
+        if (selectedCell) {
+          const { innerRowIndex, innerColIndex } =
+            getCellPosition(selectedCell);
+
+          // Calculate the new position based on arrow key
+          let newRow = innerRowIndex;
+          let newCol = innerColIndex;
+
+          if (key === "ArrowUp") newRow = newRow - 1 < 0 ? 8 : newRow - 1;
+          if (key === "ArrowDown") newRow = newRow + 1 > 8 ? 0 : newRow + 1;
+          if (key === "ArrowLeft") newCol = newCol - 1 < 0 ? 8 : newCol - 1;
+          if (key === "ArrowRight") newCol = newCol + 1 > 8 ? 0 : newCol + 1;
+
+          // Calculate the parent cell and inner cell indices
+          const parentRow = Math.floor(newRow / 3);
+          const parentCol = Math.floor(newCol / 3);
+          const parentCellIndex = parentRow * 3 + parentCol;
+
+          const innerRow = newRow % 3;
+          const innerCol = newCol % 3;
+          const innerCellIndex = innerRow * 3 + innerCol;
+
+          // Find the new cell
+          const cells = document.querySelectorAll(".cell");
+          const parentCell = cells[parentCellIndex];
+          if (parentCell) {
+            const innerCells = parentCell.querySelectorAll(".inner-cell");
+            const innerCell = innerCells[innerCellIndex];
+            if (innerCell) {
+              const button = innerCell.children[0] as HTMLButtonElement;
+              selectInnerCell(button);
+            }
+          }
+        }
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  });
+
   return (
     <div className="game">
       <div className="timer">
@@ -440,7 +505,7 @@ const Game = () => {
           <button
             className="input-button button-reset-board"
             onClick={() => {
-              fillGrid(testData.newboard.grids[0].value);
+              fillGrid(unsolvedBoard);
               clearBoardHighlighting(true);
               setActionHistory([]);
               setSelectedCell(null);
