@@ -113,16 +113,13 @@ const Game = () => {
   const selectInnerCell = (innerCellToSelect: HTMLButtonElement) => {
     setSelectedCell(innerCellToSelect);
 
-    const cells = document.querySelectorAll(".cell");
     // Remove Previous Highlighting
-    if (selectedCell) {
-      clearBoardHighlighting();
-    }
+    clearBoardHighlighting();
 
     // Highlight the selected cell
     innerCellToSelect.setAttribute("selected", "");
 
-    // Highlight the parent cell
+    // Highlight the parent cell (cells in the same 3x3 box)
     const parentCell = innerCellToSelect.parentElement?.parentElement;
     if (parentCell) {
       Array.from(parentCell.children).forEach((innerCell: Element) => {
@@ -131,39 +128,32 @@ const Game = () => {
       });
     }
 
-    // Highlight the row and column inner cells
-    const { parentCellIndex, innerRowIndex, innerColIndex } =
-      getCellPosition(innerCellToSelect);
+    const { innerRowIndex, innerColIndex } = getCellPosition(innerCellToSelect);
 
-    cells.forEach((cell, cellIndex) => {
-      if (cellIndex === parentCellIndex) return;
+    for (let i = 0; i < 9; i++) {
+      // Highlight the row
+      const rowButton = getInnerCellButton(innerRowIndex, i);
+      if (rowButton && rowButton !== innerCellToSelect) {
+        rowButton.setAttribute("selected-related", "");
+      }
 
-      const innerCells = cell.querySelectorAll(".inner-cell");
-      innerCells.forEach((innerCell, innerCellIndex) => {
-        if (innerCell.children[0] === innerCellToSelect) return;
+      // Highlight the column
+      const colButton = getInnerCellButton(i, innerColIndex);
+      if (colButton && colButton !== innerCellToSelect) {
+        colButton.setAttribute("selected-related", "");
+      }
+    }
 
-        const row =
-          Math.floor(cellIndex / 3) * 3 + Math.floor(innerCellIndex / 3);
-        const col = (cellIndex % 3) * 3 + (innerCellIndex % 3);
-
-        if (row === innerRowIndex || col === innerColIndex) {
-          innerCell.children[0].setAttribute("selected-related", "");
-        }
-      });
-    });
-
-    // Highlight Same Number
+    // Highlight all cells with the same number
     if (innerCellToSelect.innerText) {
       const selectedValue = innerCellToSelect.innerText;
-      cells.forEach((cell) => {
-        const innerCells = cell.querySelectorAll(".inner-cell");
-        innerCells.forEach((innerCell) => {
-          if (innerCell.children[0] !== innerCellToSelect) {
-            if (innerCell.children[0].innerHTML === selectedValue) {
-              innerCell.children[0].setAttribute("selected-related-number", "");
-            }
-          }
-        });
+      traverseBoard((innerButton) => {
+        if (
+          innerButton !== innerCellToSelect &&
+          innerButton.innerHTML === selectedValue
+        ) {
+          innerButton.setAttribute("selected-related-number", "");
+        }
       });
     }
 
@@ -177,6 +167,7 @@ const Game = () => {
           errorCell.removeAttribute("error");
           return;
         }
+
         const { innerRowIndex: cellRow, innerColIndex: cellCol } =
           getCellPosition(errorCell as HTMLElement);
 
@@ -249,6 +240,7 @@ const Game = () => {
         return cell.innerHTML;
       })
       .filter((cell) => cell);
+
     if (highlightedCellNumbers.includes(innerCellToSelect.innerHTML)) {
       Array.from(
         document.querySelectorAll("[selected], [selected-related]")
@@ -322,6 +314,45 @@ const Game = () => {
     });
   };
 
+  const getInnerCellButton = (x: number, y: number) => {
+    const cells = document.querySelectorAll(".cell");
+    const cellIndex = Math.floor(x / 3) * 3 + Math.floor(y / 3);
+    const innerCellIndex = (x % 3) * 3 + (y % 3);
+    const cell = cells[cellIndex];
+    if (cell) {
+      const innerCells = cell.querySelectorAll(".inner-cell");
+      return innerCells[innerCellIndex].children[0] as HTMLButtonElement;
+    }
+    return null;
+  };
+
+  const getSelectedCellPosition = () => {
+    if (selectedCell) {
+      const parentCellIndex =
+        parseInt(
+          selectedCell.parentElement?.parentElement?.getAttribute(
+            "data-index"
+          ) || "0"
+        ) - 1;
+      const innerCellIndex =
+        parseInt(selectedCell.getAttribute("data-index") || "0") - 1;
+      return { parentCellIndex, innerCellIndex };
+    }
+    return null;
+  };
+
+  const getSelectedCellPositionXY = () => {
+    const position = getSelectedCellPosition();
+    if (position) {
+      const { parentCellIndex, innerCellIndex } = position;
+      const x =
+        Math.floor(parentCellIndex / 3) * 3 + Math.floor(innerCellIndex / 3);
+      const y = (parentCellIndex % 3) * 3 + (innerCellIndex % 3);
+      return { x, y };
+    }
+    return null;
+  };
+
   const fillGrid = (grid: number[][]) => {
     traverseBoard((innerButton, row, col) => {
       const value = grid[row][col];
@@ -371,38 +402,23 @@ const Game = () => {
         key === "ArrowRight"
       ) {
         event.preventDefault();
-        if (selectedCell) {
-          const { innerRowIndex, innerColIndex } =
-            getCellPosition(selectedCell);
+        const position = getSelectedCellPositionXY();
+
+        if (position) {
+          let { x, y } = position;
 
           // Calculate the new position based on arrow key
-          let newRow = innerRowIndex;
-          let newCol = innerColIndex;
+          if (key === "ArrowUp") x = x - 1 < 0 ? 8 : x - 1;
+          if (key === "ArrowDown") x = x + 1 > 8 ? 0 : x + 1;
+          if (key === "ArrowLeft") y = y - 1 < 0 ? 8 : y - 1;
+          if (key === "ArrowRight") y = y + 1 > 8 ? 0 : y + 1;
 
-          if (key === "ArrowUp") newRow = newRow - 1 < 0 ? 8 : newRow - 1;
-          if (key === "ArrowDown") newRow = newRow + 1 > 8 ? 0 : newRow + 1;
-          if (key === "ArrowLeft") newCol = newCol - 1 < 0 ? 8 : newCol - 1;
-          if (key === "ArrowRight") newCol = newCol + 1 > 8 ? 0 : newCol + 1;
+          // Get the button at the new position
+          const button = getInnerCellButton(x, y);
 
-          // Calculate the parent cell and inner cell indices
-          const parentRow = Math.floor(newRow / 3);
-          const parentCol = Math.floor(newCol / 3);
-          const parentCellIndex = parentRow * 3 + parentCol;
-
-          const innerRow = newRow % 3;
-          const innerCol = newCol % 3;
-          const innerCellIndex = innerRow * 3 + innerCol;
-
-          // Find the new cell
-          const cells = document.querySelectorAll(".cell");
-          const parentCell = cells[parentCellIndex];
-          if (parentCell) {
-            const innerCells = parentCell.querySelectorAll(".inner-cell");
-            const innerCell = innerCells[innerCellIndex];
-            if (innerCell) {
-              const button = innerCell.children[0] as HTMLButtonElement;
-              selectInnerCell(button);
-            }
+          // Select the new cell if a button was found
+          if (button) {
+            selectInnerCell(button);
           }
         }
       }
