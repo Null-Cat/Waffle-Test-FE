@@ -68,7 +68,7 @@
 
 .cell-button[error] {
   color: rgb(255, 25, 25);
-  background-color: rgb(255, 137, 137);
+  background-color: rgb(255, 167, 167);
 }
 
 .cell-button[selected] {
@@ -100,6 +100,12 @@
   padding: 0.5rem 1.2rem;
   background-color: var(--color-tone-6);
   cursor: pointer;
+  transition: all 0.2s var(--easing);
+}
+
+.input-button:active {
+  border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+  transform: translateY(1px);
 }
 
 .input-button:hover {
