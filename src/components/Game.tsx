@@ -44,11 +44,82 @@ const Game = () => {
   const [timeFinished, setTimeFinished] = useState<Date | null>(null);
 
   const handleCellClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    setSelectedCell(e.currentTarget);
+
+    const cells = document.querySelectorAll(".cell");
+    // Remove Previous Highlighting
     if (selectedCell) {
       selectedCell.removeAttribute("selected");
+      Array.from(cells).forEach((cell) => {
+        const innerCells = cell.querySelectorAll(".inner-cell");
+        innerCells.forEach((innerCell) => {
+          innerCell.children[0].removeAttribute("selected-related");
+          innerCell.children[0].removeAttribute("selected-related-number");
+        });
+      });
     }
-    setSelectedCell(e.currentTarget);
+
+    // Highlight the selected cell
     e.currentTarget.setAttribute("selected", "");
+
+    // Highlight the parent cell
+    const parentCell = e.currentTarget.parentElement?.parentElement;
+    if (parentCell) {
+      Array.from(parentCell.children).forEach((innerCell: Element) => {
+        if (innerCell === e.currentTarget.parentElement) return;
+        innerCell.children[0].setAttribute("selected-related", "");
+      });
+    }
+
+    // Highlight the row and column inner cells
+    const parentCellIndex =
+      parseInt(
+        e.currentTarget.parentElement?.parentElement?.getAttribute(
+          "data-index"
+        ) || "0"
+      ) - 1;
+    const innerCellIndex =
+      parseInt(e.currentTarget.getAttribute("data-index") || "0") - 1;
+
+    const parentRow = Math.floor(parentCellIndex / 3);
+    const parentCol = parentCellIndex % 3;
+    const innerRow = Math.floor(innerCellIndex / 3);
+    const innerCol = innerCellIndex % 3;
+
+    const innerRowIndex = parentRow * 3 + innerRow;
+    const innerColIndex = parentCol * 3 + innerCol;
+
+    cells.forEach((cell, cellIndex) => {
+      if (cellIndex === parentCellIndex) return;
+
+      const innerCells = cell.querySelectorAll(".inner-cell");
+      innerCells.forEach((innerCell, innerCellIndex) => {
+        if (innerCell.children[0] === e.currentTarget) return;
+
+        const row =
+          Math.floor(cellIndex / 3) * 3 + Math.floor(innerCellIndex / 3);
+        const col = (cellIndex % 3) * 3 + (innerCellIndex % 3);
+
+        if (row === innerRowIndex || col === innerColIndex) {
+          innerCell.children[0].setAttribute("selected-related", "");
+        }
+      });
+    });
+
+    // Highlight Same Number
+    if (e.currentTarget.innerText) {
+      const selectedValue = e.currentTarget.innerText;
+      cells.forEach((cell) => {
+        const innerCells = cell.querySelectorAll(".inner-cell");
+        innerCells.forEach((innerCell) => {
+          if (innerCell.children[0] !== e.currentTarget) {
+            if (innerCell.children[0].innerHTML === selectedValue) {
+              innerCell.children[0].setAttribute("selected-related-number", "");
+            }
+          }
+        });
+      });
+    }
   };
 
   const handleGameFinish = () => {

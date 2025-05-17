@@ -59,7 +59,15 @@
 }
 
 .cell-button[selected] {
-  background-color: lightblue;
+  background-color: rgb(100, 216, 255);
+}
+
+.cell-button[selected-related] {
+  background-color: rgb(207, 243, 255);
+}
+
+.cell-button[selected-related-number] {
+  background-color: rgb(159, 231, 255);
 }
 
 .cell-button:hover {
@@ -67,6 +75,10 @@
 }
 
 .cell-button:hover[selected] {
+  background-color: rgb(71, 173, 207);
+}
+
+.cell-button:hover[selected-related] {
   background-color: lightblue;
 }
 
@@ -92,7 +104,7 @@
 }
 
 .timer-display {
-  font-size: calc(var(--font-size) * 0.8);
+  font-size: calc(var(--font-size) * 1);
   font-family: var(--title-font);
   margin: 0;
 }
