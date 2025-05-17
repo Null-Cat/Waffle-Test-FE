@@ -19,26 +19,6 @@
   grid-template-rows: repeat(3, 1fr);
 }
 
-.game-inputs {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  gap: 1rem;
-  width: 100%;
-  max-width: var(--board-size);
-  margin: 1rem auto;
-}
-
-.game-inputs-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  flex-grow: 1;
-  flex-basis: 0;
-}
-
 .cell-button {
   display: flex;
   justify-content: center;
@@ -110,6 +90,37 @@
 
 .input-button:hover {
   background-color: var(--color-tone-5);
+}
+
+.button-number {
+  color: var(--blue);
+}
+
+.game-inputs {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  max-width: var(--board-size);
+  margin: 1rem auto;
+}
+
+.game-inputs-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  flex-grow: 1;
+  flex-basis: 0;
+}
+
+.game-inputs-special {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
 }
 
 .timer {

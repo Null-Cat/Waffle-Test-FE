@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { EraserIcon, UndoIcon, ResetIcon } from "./SVGs";
 import "./Game.css";
 
 interface PlayerAction {
@@ -302,26 +303,36 @@ const Game = () => {
           {Array.from({ length: 9 }, (_, index) => (
             <button
               key={`input-${index}`}
-              className="input-button"
+              className="input-button button-number"
               onClick={() => handleNumberInput(index + 1)}
             >
               {index + 1}
             </button>
           ))}
         </div>
-        <div>
+        <div className="game-inputs-special">
           <button
-            className="input-button"
+            className="input-button button-undo"
+            onClick={handleUndoAction}
+          >
+            <span className="undo-icon">
+              <UndoIcon />
+            </span>
+          </button>
+          <button
+            className="input-button button-erase"
             onClick={() => {
               if (selectedCell && !selectedCell.hasAttribute("data-locked")) {
                 selectedCell.innerText = "";
               }
             }}
           >
-            Clear
+            <span className="erase-icon">
+              <EraserIcon />
+            </span>
           </button>
           <button
-            className="input-button"
+            className="input-button button-reset-board"
             onClick={() => {
               fillGrid(testData.newboard.grids[0].value);
               clearBoardHighlighting(true);
@@ -329,10 +340,9 @@ const Game = () => {
               setSelectedCell(null);
             }}
           >
-            Reset
-          </button>
-          <button className="input-button" onClick={handleUndoAction}>
-            Undo
+            <span className="reset-icon">
+              <ResetIcon />
+            </span>
           </button>
         </div>
       </div>
