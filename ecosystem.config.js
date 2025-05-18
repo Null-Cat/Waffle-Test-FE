@@ -31,7 +31,7 @@ module.exports = {
       path: "/var/www/fewaffle",
       "post-setup": "ls -la",
       "post-deploy":
-        "sudo npm install && sudo pm2 reload ecosystem.config.js --env production",
+        "sudo npm install && sudo npm run build && sudo pm2 reload ecosystem.config.js --env production",
     },
   },
 };
