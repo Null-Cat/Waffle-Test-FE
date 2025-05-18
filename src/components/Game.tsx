@@ -272,7 +272,6 @@ const Game = () => {
       .then((data: HintAPIResponse) => {
         if (data) {
           const { parentCellIndex, innerCellIndex, hint } = data;
-          console.log(data);
           const cellButton = getInnerCellButton(
             parentCellIndex,
             innerCellIndex
@@ -679,6 +678,7 @@ const Game = () => {
         innerButton.setAttribute("data-locked", "");
         innerButton.innerHTML = value.toString();
       } else {
+        innerButton.removeAttribute("data-locked");
         innerButton.innerHTML = "";
       }
     });
