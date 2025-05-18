@@ -134,6 +134,26 @@ const Game = () => {
   };
 
   /**
+   * Handles the game exit action by resetting the game state to its initial values.
+   * This includes:
+   * - Configuring the overlay
+   * - Marking the game as finished
+   * - Resetting the timer and time tracking
+   * - Clearing the board ID, unsolved board, and difficulty settings
+   * - Filling the grid with zeros (9x9 empty grid)
+   */
+  const handleGameExit = () => {
+    configureOverlay(true, false, true);
+    setGameFinished(true);
+    setTimer(0);
+    setTimeStarted(null);
+    setBoardID(0);
+    setUnsolvedBoard([]);
+    setDifficulty("");
+    fillGrid(Array.from({ length: 9 }, () => Array(9).fill(0)));
+  };
+
+  /**
    * Handles the game completion process.
    *
    * This function is triggered when a player finishes a game.
@@ -774,6 +794,10 @@ const Game = () => {
         handleNumberInput(parseInt(key));
       } else if (key === "Backspace" || key === "Delete") {
         handleNumberInput(0);
+      } else if (key === "Escape") {
+        handleGameExit();
+      } else if (key === "h") {
+        handleHint();
       } else if (key === "z" && (event.ctrlKey || event.metaKey)) {
         handleUndoAction();
       } else if (
@@ -933,19 +957,7 @@ const Game = () => {
               <ResetIcon />
             </span>
           </button>
-          <button
-            className="input-button button-exit"
-            onClick={() => {
-              configureOverlay(true, false, true);
-              setGameFinished(true);
-              setTimer(0);
-              setTimeStarted(null);
-              setBoardID(0);
-              setUnsolvedBoard([]);
-              setDifficulty("");
-              fillGrid(Array.from({ length: 9 }, () => Array(9).fill(0)));
-            }}
-          >
+          <button className="input-button button-exit" onClick={handleGameExit}>
             <span className="exit-icon">
               <ExitIcon />
             </span>
