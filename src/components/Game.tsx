@@ -164,7 +164,6 @@ const Game = () => {
     })
       .then((response) => {
         if (response.ok) {
-          console.log("Board has been solved");
           configureOverlay(true, false, false, true);
           return;
         }
@@ -214,7 +213,16 @@ const Game = () => {
     }
     configureOverlay(true, true, false);
     fetch(url)
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) {
+          configureOverlay(true, false, true);
+          return response.json().then((data) => {
+            console.error("Error fetching board:", data.message);
+            return;
+          });
+        }
+        return response.json();
+      })
       .then((data: GameBoardAPIResponse) => {
         setBoardID(data.id);
         setDifficulty(
@@ -227,6 +235,7 @@ const Game = () => {
       })
       .catch((error) => {
         console.error("Error fetching board:", error);
+        configureOverlay(true, false, true);
       });
   };
 
