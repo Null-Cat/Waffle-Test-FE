@@ -12,12 +12,6 @@ interface SolveAPIResponse {
   board: number[][] | null;
 }
 
-interface HintLocation {
-  row: number;
-  col: number;
-  value: number;
-}
-
 interface GameBoardAPIResponse {
   id: number;
   value: number[][];
@@ -31,6 +25,9 @@ interface HintAPIResponse {
 }
 
 const Game = () => {
+  const baseAPIURL = "http://localhost:3000";
+  const defaultStarterHints = 5;
+
   const [boardID, setBoardID] = useState<number>(0);
   const [difficulty, setDifficulty] = useState<string>("");
   const [unsolvedBoard, setUnsolvedBoard] = useState<number[][]>([]);
@@ -39,8 +36,7 @@ const Game = () => {
   );
   const [actionHistory, setActionHistory] = useState<PlayerAction[]>([]);
   const [timer, setTimer] = useState(0);
-  const [hintCount, setHintCount] = useState(0);
-  const [hintLocations, setHintLocations] = useState<HintLocation[]>([]);
+  const [hintCount, setHintCount] = useState(defaultStarterHints);
   const [gameFinished, setGameFinished] = useState(true);
   const [timeStarted, setTimeStarted] = useState<Date | null>(null);
   const [timeFinished, setTimeFinished] = useState<Date | null>(null);
@@ -156,7 +152,7 @@ const Game = () => {
   const handleGameFinish = () => {
     setTimeFinished(new Date());
     setGameFinished(true);
-    fetch("http://localhost:3000/solve", {
+    fetch(`${baseAPIURL}/solve`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -209,11 +205,11 @@ const Game = () => {
     setTimeStarted(new Date());
     setTimeFinished(null);
     setTimer(0);
-    setHintCount(3);
+    setHintCount(defaultStarterHints);
     setActionHistory([]);
-    let url = new URL("http://localhost:3000/random");
+    let url = new URL(`${baseAPIURL}/random`);
     if (difficulty !== "any") {
-      url = new URL("http://localhost:3000/daily");
+      url = new URL(`${baseAPIURL}/daily`);
       url.searchParams.append("difficulty", difficulty);
     }
     configureOverlay(true, true, false);
@@ -234,6 +230,21 @@ const Game = () => {
       });
   };
 
+  /**
+   * Handles the user request for a hint in the game.
+   *
+   * If the user has no hints left (hintCount <= 0), applies a horizontal shaking animation
+   * to the hint counter element to indicate that no hints are available.
+   *
+   * If hints are available, decrements the hint count and makes an API request to get a hint.
+   * Upon successful response, the hint value is placed in the specified cell, the cell is locked,
+   * the unsolved board state is updated, and the cell is selected.
+   *
+   * @throws Will log an error to the console if the hint fetch request fails.
+   *
+   * @remarks
+   * - Modifies game unsolvedBoard
+   */
   const handleHint = () => {
     if (hintCount <= 0) {
       hintCounterRef.current?.setAttribute("horizontal-shaking", "");
@@ -247,7 +258,7 @@ const Game = () => {
       return;
     }
     setHintCount(hintCount - 1);
-    fetch("http://localhost:3000/hint", {
+    fetch(`${baseAPIURL}/hint`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
