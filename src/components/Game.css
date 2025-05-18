@@ -1,3 +1,11 @@
+.game {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: var(--board-size);
+  margin: auto;
+}
+
 .game-board {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -132,10 +140,26 @@
   gap: 1rem;
 }
 
+.game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.game-header > p {
+  font-size: calc(var(--font-size) * 1.5);
+  font-family: var(--title-font);
+  font-weight: var(--title-font-weight);
+  margin: 0;
+}
+
 .timer {
   display: flex;
   justify-content: center;
   align-items: center;
+  position: absolute;
+  width: var(--board-size);
 }
 
 .timer-display {
@@ -143,4 +167,100 @@
   font-family: var(--title-font);
   font-weight: var(--title-font-weight);
   margin: 0;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+
+.throbber {
+  animation: throb 0.5s ease-in-out infinite;
+  user-select: none;
+  pointer-events: none;
+}
+
+@keyframes throb {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.loading-text {
+  font-size: calc(var(--font-size) * 1.5);
+  font-family: var(--title-font);
+  font-weight: var(--title-font-weight);
+  color: white;
+  margin: 0;
+  user-select: none;
+}
+
+.overlay-loading {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.start-overlay {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: white;
+  border-radius: 12%;
+  padding: 2rem;
+  border-bottom: 5px solid rgba(0, 0, 0, 0.1);
+}
+
+.start-daily-buttons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  padding-bottom: 3rem;
+}
+
+.start-overlay > h1 {
+  font-size: calc(var(--font-size) * 1.8);
+  font-family: var(--title-font);
+  font-weight: 900;
+  margin: 0;
+  padding-bottom: 2rem;
+}
+
+.start-overlay > h2 {
+  font-size: calc(var(--font-size) * 1.2);
+  font-family: var(--title-font);
+  font-weight: var(--title-font-weight);
+  margin: 0;
+}
+
+.start-overlay > p {
+  font-size: calc(var(--font-size) * 0.8);
+  font-family: var(--title-font);
+  font-weight: var(--title-font-weight);
+  margin: 0;
+  padding-bottom: 1rem;
+}
+
+.start-button {
+  color: black;
+  font-size: calc(var(--font-size) * 1.1);
 }

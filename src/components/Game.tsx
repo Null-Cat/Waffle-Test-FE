@@ -14,6 +14,7 @@ interface SolveAPIResponse {
 
 const Game = () => {
   const [boardID, setBoardID] = useState<number>(0);
+  const [difficulty, setDifficulty] = useState<string>("");
   const [unsolvedBoard, setUnsolvedBoard] = useState<number[][]>([]);
   const [selectedCell, setSelectedCell] = useState<HTMLButtonElement | null>(
     null
@@ -68,7 +69,7 @@ const Game = () => {
   const handleGameFinish = () => {
     setTimeFinished(new Date());
     setGameFinished(true);
-    fetch("http://localhost:3000/solved", {
+    fetch("http://localhost:3000/solve", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -95,21 +96,26 @@ const Game = () => {
       });
   };
 
-  const handleGameStart = () => {
+  const handleGameStart = (difficulty: string = "any") => {
     setTimeStarted(new Date());
     setTimeFinished(null);
-    setGameFinished(false);
     setTimer(0);
     setActionHistory([]);
-    const url = new URL("http://localhost:3000/board");
-    url.searchParams.append("difficulty", "MEDIUM");
-
+    let url = new URL("http://localhost:3000/random");
+    if (difficulty !== "any") {
+      url = new URL("http://localhost:3000/daily");
+      url.searchParams.append("difficulty", difficulty);
+    }
+    configureOverlay(true, true, false);
     fetch(url)
       .then((response) => response.json())
       .then((data) => {
         setBoardID(data.id);
+        setDifficulty(difficulty === "any" ? data.difficulty : difficulty);
         setUnsolvedBoard(data.value);
         fillGrid(data.value);
+        configureOverlay(false, false, false);
+        setGameFinished(false);
       })
       .catch((error) => {
         console.error("Error fetching board:", error);
@@ -382,6 +388,25 @@ const Game = () => {
     return boardState;
   };
 
+  const configureOverlay = (
+    showOverlay: boolean = false,
+    showLoadingOverlay: boolean = false,
+    showStartOverlay: boolean = false
+  ) => {
+    const overlay = document.querySelector(".overlay") as HTMLElement;
+    const loadingOverlay = document.querySelector(
+      ".overlay-loading"
+    ) as HTMLElement;
+    const startOverlay = document.querySelector(
+      ".start-overlay"
+    ) as HTMLElement;
+    if (overlay && loadingOverlay && startOverlay) {
+      overlay.style.display = showOverlay ? "flex" : "none";
+      loadingOverlay.style.display = showLoadingOverlay ? "flex" : "none";
+      startOverlay.style.display = showStartOverlay ? "flex" : "none";
+    }
+  };
+
   useEffect(() => {
     if (!gameFinished) {
       const interval = setInterval(() => {
@@ -438,14 +463,12 @@ const Game = () => {
 
   return (
     <div className="game">
-      <div className="timer">
-        <p className="timer-display">{formatTime(timer)}</p>
-        <button className="start-button" onClick={handleGameStart}>
-          Start
-        </button>
-        <button className="finish-button" onClick={handleGameFinish}>
-          Finish
-        </button>
+      <div className="game-header">
+        <p>{`#${boardID.toString().padStart(4, "0")}`}</p>
+        <div className="timer">
+          <p className="timer-display">{formatTime(timer)}</p>
+        </div>
+        <p className="board-difficulty">{difficulty}</p>
       </div>
       <div className="game-board">
         {Array.from({ length: 9 }, (_, cellIndex) => (
@@ -536,6 +559,47 @@ const Game = () => {
             <span className="reset-icon">
               <ResetIcon />
             </span>
+          </button>
+        </div>
+      </div>
+      <div className="overlay">
+        <div className="overlay-loading">
+          <img className="throbber" src="/waffle.png" alt="Loading..." />
+          <div className="loading-text">
+            <h2>Baking a new board...</h2>
+          </div>
+        </div>
+        <div className="start-overlay">
+          <h1>Welcome to Phil's Waffle Sudoku</h1>
+          <h2>Daily Challenges</h2>
+          <p>Climb the Daily Leaderboard</p>
+          <div className="start-daily-buttons">
+            <button
+              className="input-button start-button"
+              onClick={() => handleGameStart("Easy")}
+            >
+              Easy
+            </button>
+            <button
+              className="input-button start-button"
+              onClick={() => handleGameStart("Medium")}
+            >
+              Medium
+            </button>
+            <button
+              className="input-button start-button"
+              onClick={() => handleGameStart("Hard")}
+            >
+              Hard
+            </button>
+          </div>
+          <h2>Random</h2>
+          <p>Play a random board of random difficulty</p>
+          <button
+            className="input-button start-button"
+            onClick={() => handleGameStart()}
+          >
+            Cook me a board
           </button>
         </div>
       </div>
