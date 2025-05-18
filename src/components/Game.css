@@ -159,6 +159,28 @@
   user-select: none;
 }
 
+.hint-counter[horizontal-shaking] {
+  animation: horizontal-shaking 0.2s ease-in-out 1;
+}
+
+@keyframes horizontal-shaking {
+  0% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(2px);
+  }
+  50% {
+    transform: translateX(-2px);
+  }
+  75% {
+    transform: translateX(2px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
 .game-header {
   display: flex;
   justify-content: space-between;

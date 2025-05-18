@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { EraserIcon, UndoIcon, ResetIcon, HintIcon, PauseIcon } from "./SVGs";
 import "./Game.css";
 
@@ -44,6 +44,8 @@ const Game = () => {
   const [gameFinished, setGameFinished] = useState(true);
   const [timeStarted, setTimeStarted] = useState<Date | null>(null);
   const [timeFinished, setTimeFinished] = useState<Date | null>(null);
+
+  const hintCounterRef = useRef<HTMLDivElement>(null);
 
   /**
    * Handles the click event on a cell button.
@@ -233,7 +235,17 @@ const Game = () => {
   };
 
   const handleHint = () => {
-    if (hintCount <= 0) return;
+    if (hintCount <= 0) {
+      hintCounterRef.current?.setAttribute("horizontal-shaking", "");
+      const handleAnimationEnd = () => {
+        hintCounterRef.current?.removeAttribute("horizontal-shaking");
+      };
+      hintCounterRef.current?.addEventListener(
+        "animationend",
+        handleAnimationEnd
+      );
+      return;
+    }
     setHintCount(hintCount - 1);
     fetch("http://localhost:3000/hint", {
       method: "POST",
@@ -884,7 +896,9 @@ const Game = () => {
                 <HintIcon />
               </span>
             </button>
-            <div className="hint-counter">{hintCount}</div>
+            <div className="hint-counter" ref={hintCounterRef}>
+              {hintCount}
+            </div>
           </div>
           <button
             className="input-button button-reset-board"
