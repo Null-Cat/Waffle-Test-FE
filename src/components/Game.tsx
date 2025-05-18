@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { EraserIcon, UndoIcon, ResetIcon } from "./SVGs";
+import { EraserIcon, UndoIcon, ResetIcon, HintIcon, PauseIcon } from "./SVGs";
 import "./Game.css";
 
 interface PlayerAction {
@@ -12,6 +12,24 @@ interface SolveAPIResponse {
   board: number[][] | null;
 }
 
+interface HintLocation {
+  row: number;
+  col: number;
+  value: number;
+}
+
+interface GameBoardAPIResponse {
+  id: number;
+  value: number[][];
+  difficulty: string | null;
+}
+
+interface HintAPIResponse {
+  parentCellIndex: number;
+  innerCellIndex: number;
+  hint: number;
+}
+
 const Game = () => {
   const [boardID, setBoardID] = useState<number>(0);
   const [difficulty, setDifficulty] = useState<string>("");
@@ -21,6 +39,8 @@ const Game = () => {
   );
   const [actionHistory, setActionHistory] = useState<PlayerAction[]>([]);
   const [timer, setTimer] = useState(0);
+  const [hintCount, setHintCount] = useState(0);
+  const [hintLocations, setHintLocations] = useState<HintLocation[]>([]);
   const [gameFinished, setGameFinished] = useState(true);
   const [timeStarted, setTimeStarted] = useState<Date | null>(null);
   const [timeFinished, setTimeFinished] = useState<Date | null>(null);
@@ -187,6 +207,7 @@ const Game = () => {
     setTimeStarted(new Date());
     setTimeFinished(null);
     setTimer(0);
+    setHintCount(3);
     setActionHistory([]);
     let url = new URL("http://localhost:3000/random");
     if (difficulty !== "any") {
@@ -196,9 +217,11 @@ const Game = () => {
     configureOverlay(true, true, false);
     fetch(url)
       .then((response) => response.json())
-      .then((data) => {
+      .then((data: GameBoardAPIResponse) => {
         setBoardID(data.id);
-        setDifficulty(difficulty === "any" ? data.difficulty : difficulty);
+        setDifficulty(
+          difficulty === "any" ? data.difficulty || "Err" : difficulty
+        );
         setUnsolvedBoard(data.value);
         fillGrid(data.value);
         configureOverlay(false, false, false);
@@ -206,6 +229,40 @@ const Game = () => {
       })
       .catch((error) => {
         console.error("Error fetching board:", error);
+      });
+  };
+
+  const handleHint = () => {
+    if (hintCount <= 0) return;
+    setHintCount(hintCount - 1);
+    fetch("http://localhost:3000/hint", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        boardID: boardID,
+        board: getBoardState(),
+      }),
+    })
+      .then((response) => response.json())
+      .then((data: HintAPIResponse) => {
+        if (data) {
+          const { parentCellIndex, innerCellIndex, hint } = data;
+          console.log(data);
+          const cellButton = getInnerCellButton(
+            parentCellIndex,
+            innerCellIndex
+          );
+          if (cellButton) {
+            cellButton.innerHTML = hint.toString();
+            cellButton.setAttribute("data-locked", "");
+            selectInnerCell(cellButton);
+          }
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching hint:", error);
       });
   };
 
@@ -815,6 +872,14 @@ const Game = () => {
               <EraserIcon />
             </span>
           </button>
+          <div className="hint-button-container">
+            <button className="input-button button-hint" onClick={handleHint}>
+              <span className="hint-icon">
+                <HintIcon />
+              </span>
+            </button>
+            <div className="hint-counter">{hintCount}</div>
+          </div>
           <button
             className="input-button button-reset-board"
             onClick={() => {
@@ -826,6 +891,14 @@ const Game = () => {
           >
             <span className="reset-icon">
               <ResetIcon />
+            </span>
+          </button>
+          <button
+            className="input-button button-pause"
+            onClick={() => console.log("pause")}
+          >
+            <span className="pause-icon">
+              <PauseIcon />
             </span>
           </button>
         </div>

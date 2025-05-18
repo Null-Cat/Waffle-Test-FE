@@ -140,11 +140,31 @@
   gap: 1rem;
 }
 
+.hint-button-container {
+  position: relative;
+}
+
+.hint-counter {
+  position: absolute;
+  top: -15px;
+  right: -8px;
+  z-index: 1;
+  padding: 0.25rem 0.5rem;
+  font-size: calc(var(--font-size) * 0.8);
+  font-family: var(--title-font);
+  background-color: var(--color-tone-7);
+  color: var(--color-tone-3);
+  border: 2px solid var(--color-tone-5);
+  border-radius: 0.5rem;
+  user-select: none;
+}
+
 .game-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
+  user-select: none;
 }
 
 .game-header > p {
