@@ -25,7 +25,7 @@ interface HintAPIResponse {
 }
 
 const Game = () => {
-  const baseAPIURL = "https://waffle-api.philipwhite.dev/";
+  const baseAPIURL = "https://waffle-api.philipwhite.dev";
   const defaultStarterHints = 5;
 
   const [boardID, setBoardID] = useState<number>(0);
