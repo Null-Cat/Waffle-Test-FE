@@ -433,6 +433,14 @@ const Game = () => {
         key === "ArrowRight"
       ) {
         event.preventDefault();
+        if (!selectedCell) {
+          const firstButton = document.querySelector(
+            ".cell-button"
+          ) as HTMLButtonElement;
+          if (firstButton) {
+            selectInnerCell(firstButton);
+          }
+        }
         const position = getSelectedCellPositionXY();
 
         if (position) {
