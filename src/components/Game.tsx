@@ -63,6 +63,17 @@ const Game = () => {
         selectedCell.innerText = number === 0 ? "" : number.toString();
       }
       selectInnerCell(selectedCell);
+
+      // Submit the board to the server if the game is finished
+      const isBoardComplete = Array.from(
+        document.querySelectorAll(".cell-button")
+      ).every((cellButton) => {
+        const cellValue = cellButton.innerHTML;
+        return !cellButton.hasAttribute("error") && cellValue !== "";
+      });
+      if (isBoardComplete) {
+        handleGameFinish();
+      }
     }
   };
 
@@ -82,6 +93,7 @@ const Game = () => {
       .then((response) => {
         if (response.ok) {
           console.log("Board has been solved");
+          configureOverlay(true, false, false, true);
           return;
         }
         return response.json();
@@ -391,7 +403,8 @@ const Game = () => {
   const configureOverlay = (
     showOverlay: boolean = false,
     showLoadingOverlay: boolean = false,
-    showStartOverlay: boolean = false
+    showStartOverlay: boolean = false,
+    showGameFinishedOverlay: boolean = false
   ) => {
     const overlay = document.querySelector(".overlay") as HTMLElement;
     const loadingOverlay = document.querySelector(
@@ -400,22 +413,30 @@ const Game = () => {
     const startOverlay = document.querySelector(
       ".start-overlay"
     ) as HTMLElement;
+    const gameFinishedOverlay = document.querySelector(
+      ".game-finished-overlay"
+    ) as HTMLElement;
     if (overlay && loadingOverlay && startOverlay) {
       overlay.style.display = showOverlay ? "flex" : "none";
       loadingOverlay.style.display = showLoadingOverlay ? "flex" : "none";
       startOverlay.style.display = showStartOverlay ? "flex" : "none";
+      gameFinishedOverlay.style.display = showGameFinishedOverlay
+        ? "flex"
+        : "none";
     }
   };
 
   useEffect(() => {
     if (!gameFinished) {
       const interval = setInterval(() => {
-        setTimer((prevTimer) => prevTimer + 1);
+        setTimer(
+          Math.floor((Date.now() - (timeStarted?.getTime() || 0)) / 1000)
+        );
       }, 1000);
 
       return () => clearInterval(interval);
     }
-  }, [gameFinished]);
+  }, [gameFinished, timeStarted]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -607,7 +628,26 @@ const Game = () => {
             className="input-button start-button"
             onClick={() => handleGameStart()}
           >
-            Cook me a board
+            Cook me a Board
+          </button>
+        </div>
+        <div className="game-finished-overlay">
+          <h1>Congratulations!</h1>
+          <h2>You have completed the board</h2>
+          <p>
+            {`Time taken: ${formatTime(
+              Math.floor(
+                ((timeFinished?.getTime() || 0) -
+                  (timeStarted?.getTime() || 0)) /
+                  1000
+              )
+            )}`}
+          </p>
+          <button
+            className="input-button start-button"
+            onClick={() => configureOverlay(true, false, true)}
+          >
+            Return to the Kitchen
           </button>
         </div>
       </div>

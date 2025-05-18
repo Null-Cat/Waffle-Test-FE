@@ -264,3 +264,37 @@
   color: black;
   font-size: calc(var(--font-size) * 1.1);
 }
+
+.game-finished-overlay {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: white;
+  border-radius: 12%;
+  padding: 2rem;
+  border-bottom: 5px solid rgba(0, 0, 0, 0.1);
+}
+
+.game-finished-overlay > h1 {
+  font-size: calc(var(--font-size) * 1.8);
+  font-family: var(--title-font);
+  font-weight: 900;
+  margin: 0;
+  padding-bottom: 2rem;
+}
+
+.game-finished-overlay > h2 {
+  font-size: calc(var(--font-size) * 1.2);
+  font-family: var(--title-font);
+  font-weight: var(--title-font-weight);
+  margin: 0;
+}
+
+.game-finished-overlay > p {
+  font-size: calc(var(--font-size) * 0.8);
+  font-family: var(--title-font);
+  font-weight: var(--title-font-weight);
+  margin: 0;
+  padding-bottom: 1rem;
+}
