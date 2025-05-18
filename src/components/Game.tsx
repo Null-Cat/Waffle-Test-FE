@@ -257,6 +257,7 @@ const Game = () => {
           if (cellButton) {
             cellButton.innerHTML = hint.toString();
             cellButton.setAttribute("data-locked", "");
+            setUnsolvedBoard(getBoardState(false));
             selectInnerCell(cellButton);
           }
         }
@@ -661,24 +662,29 @@ const Game = () => {
   };
 
   /**
-   * Captures the current state of the game board.
+   * Retrieves the current state of the game board as a 2D array of numbers.
    *
-   * Creates a 9x9 grid (represented as a 2D array) that reflects the current
-   * numeric values displayed in the game board UI. Each inner cell's value is
-   * extracted from the innerHTML of the corresponding button element.
+   * @param includeUserInput - Whether to include user-inputted values in the board state.
+   *                           If false, only includes values that are locked (indicated by the
+   *                           'data-locked' attribute). Defaults to true.
    *
-   * @returns {number[][]} A 9x9 2D array where each element represents
-   * the numeric value of a cell in the game board (0 if empty or invalid).
+   * @returns A 9x9 2D array representing the game board, where:
+   *          - 0 represents an empty cell
+   *          - 1-9 represent the numbers in filled cells
+   *          - User-inputted values may be excluded based on the includeUserInput parameter
    */
-  const getBoardState = () => {
+  const getBoardState = (includeUserInput: boolean = true) => {
     const amountOfCellsInParentCell = 9;
     const boardState: number[][] = Array.from(
       { length: amountOfCellsInParentCell },
       () => Array(9).fill(0)
     );
     traverseBoard((innerButton, row, col) => {
-      const value = parseInt(innerButton.innerHTML || "0");
-      boardState[row][col] = value;
+      const shouldIncludeValue =
+        includeUserInput || innerButton.hasAttribute("data-locked");
+      const cellContent = innerButton.innerHTML;
+      boardState[row][col] =
+        shouldIncludeValue && cellContent ? parseInt(cellContent) : 0;
     });
     return boardState;
   };
