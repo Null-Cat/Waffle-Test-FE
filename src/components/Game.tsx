@@ -72,6 +72,7 @@ const Game = () => {
         return !cellButton.hasAttribute("error") && cellValue !== "";
       });
       if (isBoardComplete) {
+        configureOverlay(true, true, false);
         handleGameFinish();
       }
     }
@@ -109,6 +110,8 @@ const Game = () => {
   };
 
   const handleGameStart = (difficulty: string = "any") => {
+    setSelectedCell(null);
+    clearBoardHighlighting(true);
     setTimeStarted(new Date());
     setTimeFinished(null);
     setTimer(0);
@@ -595,7 +598,7 @@ const Game = () => {
         <div className="overlay-loading">
           <img className="throbber" src="/waffle.png" alt="Loading..." />
           <div className="loading-text">
-            <h2>Baking a new board...</h2>
+            <h2>Baking...</h2>
           </div>
         </div>
         <div className="start-overlay">
