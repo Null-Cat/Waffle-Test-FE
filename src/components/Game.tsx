@@ -25,10 +25,27 @@ const Game = () => {
   const [timeStarted, setTimeStarted] = useState<Date | null>(null);
   const [timeFinished, setTimeFinished] = useState<Date | null>(null);
 
+  /**
+   * Handles the click event on a cell button.
+   *
+   * @param e - The React mouse event from the clicked button
+   * @remarks This function passes the clicked button element to the selectInnerCell function
+   */
   const handleCellClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     selectInnerCell(e.currentTarget);
   };
 
+  /**
+   * Handles the undo action in the game.
+   *
+   * Reverts the last action performed by restoring the previous value of the cell,
+   * removing any error indicators, and updating the selection state.
+   *
+   * If there's a previous action in the history after undoing, the cell from that action
+   * will be selected. Otherwise, board highlighting is cleared and no cell is selected.
+   *
+   * @returns {void}
+   */
   const handleUndoAction = () => {
     if (actionHistory.length > 0) {
       const lastAction = actionHistory[actionHistory.length - 1];
@@ -49,6 +66,26 @@ const Game = () => {
     }
   };
 
+  /**
+   * Handles user input of a number on the selected cell in the game grid.
+   *
+   * @param number - The number to enter in the selected cell (0 represents clearing the cell)
+   *
+   * @remarks
+   * This function:
+   * - Updates the selected cell with the new number if the cell is not locked
+   * - Only updates if the number is different from the current value
+   * - Adds the previous state to action history for undo functionality
+   * - Maintains selection on the cell after updating
+   * - Checks if the board is complete after each input
+   * - Triggers game completion flow when the board is filled correctly
+   *
+   * @requires selectedCell - A DOM element reference to the currently selected cell
+   * @requires setActionHistory - State setter function for tracking changes
+   * @requires selectInnerCell - Function to handle cell selection UI
+   * @requires configureOverlay - Function to control the game overlay
+   * @requires handleGameFinish - Function to process game completion
+   */
   const handleNumberInput = (number: number) => {
     if (selectedCell && !selectedCell.hasAttribute("data-locked")) {
       const previousValue = selectedCell.innerText
@@ -78,6 +115,22 @@ const Game = () => {
     }
   };
 
+  /**
+   * Handles the game completion process.
+   *
+   * This function is triggered when a player finishes a game.
+   * 1. Records the timestamp when the game was finished
+   * 2. Updates the game state to finished
+   * 3. Sends the completed board data to the server for validation
+   * 4. Handles the response:
+   *    - If successful, displays the success overlay
+   *    - If the board is incorrect, logs an error message
+   *
+   * @remarks
+   * This function makes an API call to the backend for board validation.
+   *
+   * @returns {void}
+   */
   const handleGameFinish = () => {
     setTimeFinished(new Date());
     setGameFinished(true);
@@ -109,6 +162,25 @@ const Game = () => {
       });
   };
 
+  /**
+   * Initiates a new game by resetting game state and fetching a new puzzle board.
+   *
+   * This function resets all game-related state variables, fetches a new Sudoku board from the server
+   * based on the specified difficulty, and updates the UI accordingly.
+   *
+   * @param difficulty - The difficulty level of the puzzle to fetch. Defaults to "any".
+   *                    If "any" is specified, a random puzzle of any difficulty is fetched.
+   *                    Otherwise, a daily puzzle of the specified difficulty is fetched.
+   *
+   * @remarks
+   * This function performs the following operations:
+   * - Resets cell selection and board highlighting
+   * - Resets timer and game history
+   * - Shows loading overlay
+   * - Fetches a new puzzle from the server
+   * - Updates the game state with the new puzzle data
+   * - Hides the loading overlay
+   */
   const handleGameStart = (difficulty: string = "any") => {
     setSelectedCell(null);
     clearBoardHighlighting(true);
@@ -137,6 +209,30 @@ const Game = () => {
       });
   };
 
+  /**
+   * Handles the selection of a cell in the Sudoku board.
+   *
+   * 1. Sets the selected cell in state
+   * 2. Clears previous highlighting from the board
+   * 3. Highlights the selected cell
+   * 4. Highlights related cells:
+   *    - Cells in the same 3x3 box
+   *    - Cells in the same row
+   *    - Cells in the same column
+   *    - Cells with the same number
+   * 5. Checks for and removes error markers on cells that no longer have conflicts
+   * 6. Highlights error cells (duplicate numbers in the same row, column, or 3x3 box)
+   *
+   * @param innerCellToSelect - The HTML button element representing the cell to be selected
+   *
+   * @remarks
+   * This function uses DOM manipulation to apply visual highlighting by setting attributes
+   * on elements. It relies on the following attributes:
+   * - "selected": For the currently selected cell
+   * - "selected-related": For cells related to the selection (same row/column/box)
+   * - "selected-related-number": For cells with the same number as the selected cell
+   * - "error": For cells with duplicate numbers that violate Sudoku rules
+   */
   const selectInnerCell = (innerCellToSelect: HTMLButtonElement) => {
     setSelectedCell(innerCellToSelect);
 
@@ -156,8 +252,9 @@ const Game = () => {
     }
 
     const { innerRowIndex, innerColIndex } = getCellPosition(innerCellToSelect);
+    const amountOfCellsInParentCell = 9;
 
-    for (let i = 0; i < 9; i++) {
+    for (let i = 0; i < amountOfCellsInParentCell; i++) {
       // Highlight the row
       const rowButton = getInnerCellButton(innerRowIndex, i);
       if (rowButton && rowButton !== innerCellToSelect) {
@@ -204,9 +301,14 @@ const Game = () => {
         const cellValueInt = parseInt(cellValue);
 
         let hasDuplicate = false;
+        const amountOfCellsInParentCell = 9;
 
         // Check row
-        for (let rowIndex = 0; rowIndex < 9 && !hasDuplicate; rowIndex++) {
+        for (
+          let rowIndex = 0;
+          rowIndex < amountOfCellsInParentCell && !hasDuplicate;
+          rowIndex++
+        ) {
           if (
             rowIndex !== cellCol &&
             board[cellRow][rowIndex] === cellValueInt
@@ -218,7 +320,7 @@ const Game = () => {
         // Check column
         for (
           let columnIndex = 0;
-          columnIndex < 9 && !hasDuplicate;
+          columnIndex < amountOfCellsInParentCell && !hasDuplicate;
           columnIndex++
         ) {
           if (
@@ -230,17 +332,18 @@ const Game = () => {
         }
 
         // Check 3x3 box
-        const boxStartRow = Math.floor(cellRow / 3) * 3;
-        const boxStartCol = Math.floor(cellCol / 3) * 3;
+        const boxSize = 3;
+        const boxStartRow = Math.floor(cellRow / boxSize) * boxSize;
+        const boxStartCol = Math.floor(cellCol / boxSize) * boxSize;
 
         for (
           let rowIndex = boxStartRow;
-          rowIndex < boxStartRow + 3 && !hasDuplicate;
+          rowIndex < boxStartRow + boxSize && !hasDuplicate;
           rowIndex++
         ) {
           for (
             let columnIndex = boxStartCol;
-            columnIndex < boxStartCol + 3 && !hasDuplicate;
+            columnIndex < boxStartCol + boxSize && !hasDuplicate;
             columnIndex++
           ) {
             if (
@@ -279,6 +382,20 @@ const Game = () => {
     }
   };
 
+  /**
+   * Calculates the position of a cell within a nested grid structure.
+   *
+   * @param cell - The HTML element representing a cell in the grid
+   * @returns An object containing the following position information:
+   *   - parentCellIndex: Index of the parent cell (0-based)
+   *   - innerCellIndex: Index of the inner cell within its parent (0-based)
+   *   - parentRow: Row coordinate of the parent cell in the outer grid
+   *   - parentCol: Column coordinate of the parent cell in the outer grid
+   *   - innerRow: Row coordinate of the cell within its parent grid
+   *   - innerCol: Column coordinate of the cell within its parent grid
+   *   - innerRowIndex: Global row coordinate of the cell across the entire grid
+   *   - innerColIndex: Global column coordinate of the cell across the entire grid
+   */
   const getCellPosition = (cell: HTMLElement) => {
     const parentCellIndex =
       parseInt(
@@ -286,13 +403,14 @@ const Game = () => {
       ) - 1;
     const innerCellIndex = parseInt(cell.getAttribute("data-index") || "0") - 1;
 
-    const parentRow = Math.floor(parentCellIndex / 3);
-    const parentCol = parentCellIndex % 3;
-    const innerRow = Math.floor(innerCellIndex / 3);
-    const innerCol = innerCellIndex % 3;
+    const boxSize = 3;
+    const parentRow = Math.floor(parentCellIndex / boxSize);
+    const parentCol = parentCellIndex % boxSize;
+    const innerRow = Math.floor(innerCellIndex / boxSize);
+    const innerCol = innerCellIndex % boxSize;
 
-    const innerRowIndex = parentRow * 3 + innerRow;
-    const innerColIndex = parentCol * 3 + innerCol;
+    const innerRowIndex = parentRow * boxSize + innerRow;
+    const innerColIndex = parentCol * boxSize + innerCol;
 
     return {
       parentCellIndex,
@@ -306,6 +424,16 @@ const Game = () => {
     };
   };
 
+  /**
+   * Removes highlighting attributes from all cells on the game board.
+   *
+   * This function clears the "selected", "selected-related", and "selected-related-number"
+   * attributes from all inner cell elements. Optionally, it can also clear the "error"
+   * attribute if specified.
+   *
+   * @param clearError - Whether to clear the "error" attribute from cells.
+   * Defaults to false.
+   */
   const clearBoardHighlighting = (clearError: boolean = false) => {
     const cells = document.querySelectorAll(".cell");
     Array.from(cells).forEach((cell) => {
@@ -319,6 +447,20 @@ const Game = () => {
     });
   };
 
+  /**
+   * Formats a time value in seconds to a string representation in "MM:SS" format.
+   *
+   * @param time - The time value in seconds to format
+   * @returns A string in the format "MM:SS" where minutes and seconds are both two digits with leading zeros if necessary
+   *
+   * @example
+   * // Returns "02:05"
+   * formatTime(125);
+   *
+   * @example
+   * // Returns "00:09"
+   * formatTime(9);
+   */
   const formatTime = (time: number) => {
     const minutes = Math.floor(time / 60)
       .toString()
@@ -327,24 +469,62 @@ const Game = () => {
     return `${minutes}:${seconds}`;
   };
 
+  /**
+   * Traverses through the 9x9 grid organized as a 3x3 grid of 3x3 cells.
+   *
+   * This function iterates through each button element in the grid and applies the provided callback
+   * to each one, passing the button element along with its calculated row and column position
+   * in the overall 9x9 grid.
+   *
+   * The grid structure is expected to have the following DOM hierarchy:
+   * - Elements with class "cell" (3x3 grid of these)
+   * - Elements with class "inner-cell" within each cell (3x3 grid of these)
+   * - A button element as the first child of each inner-cell
+   *
+   * @param callback - Function to execute for each button in the grid
+   * @param callback.innerButton - The button element being processed
+   * @param callback.row - The row index (0-8) of the button in the overall grid
+   * @param callback.col - The column index (0-8) of the button in the overall grid
+   */
   const traverseBoard = (
     callback: (innerButton: HTMLButtonElement, row: number, col: number) => void
   ) => {
+    const boxSize = 3;
     const cells = document.querySelectorAll(".cell");
     cells.forEach((cell, index) => {
       const innerCells = cell.querySelectorAll(".inner-cell");
       innerCells.forEach((innerCell, innerIndex) => {
-        const row = Math.floor(index / 3) * 3 + Math.floor(innerIndex / 3);
-        const col = (index % 3) * 3 + (innerIndex % 3);
+        const row =
+          Math.floor(index / boxSize) * boxSize +
+          Math.floor(innerIndex / boxSize);
+        const col = (index % boxSize) * boxSize + (innerIndex % boxSize);
         callback(innerCell.children[0] as HTMLButtonElement, row, col);
       });
     });
   };
 
+  /**
+   * Retrieves a button element from a nested grid structure based on x and y coordinates.
+   *
+   * @param x - The x-coordinate in the overall grid.
+   * @param y - The y-coordinate in the overall grid.
+   *
+   * @returns The button element at the specified coordinates, or null if the cell doesn't exist.
+   *
+   * @remarks
+   * This function navigates a 2-level nested grid structure where:
+   * - The outer grid consists of cells with class "cell" arranged in a 3×3 grid.
+   * - Each cell contains inner cells with class "inner-cell" also arranged in a 3×3 grid.
+   * - Each inner cell contains a button as its first child.
+   *
+   * The coordinates (x,y) refer to the position in the flattened 9×9 grid of inner cells.
+   */
   const getInnerCellButton = (x: number, y: number) => {
+    const boxSize = 3;
     const cells = document.querySelectorAll(".cell");
-    const cellIndex = Math.floor(x / 3) * 3 + Math.floor(y / 3);
-    const innerCellIndex = (x % 3) * 3 + (y % 3);
+    const cellIndex =
+      Math.floor(x / boxSize) * boxSize + Math.floor(y / boxSize);
+    const innerCellIndex = (x % boxSize) * boxSize + (y % boxSize);
     const cell = cells[cellIndex];
     if (cell) {
       const innerCells = cell.querySelectorAll(".inner-cell");
@@ -353,6 +533,15 @@ const Game = () => {
     return null;
   };
 
+  /**
+   * Retrieves the position of the currently selected cell in a nested grid structure.
+   *
+   * @returns An object containing the parent cell index and inner cell index if a cell is selected,
+   *          or null if no cell is currently selected.
+   * @returns {Object|null} The position object or null
+   * @returns {number} position.parentCellIndex - The zero-based index of the parent cell
+   * @returns {number} position.innerCellIndex - The zero-based index of the inner cell
+   */
   const getSelectedCellPosition = () => {
     if (selectedCell) {
       const parentCellIndex =
@@ -368,18 +557,40 @@ const Game = () => {
     return null;
   };
 
+  /**
+   * Converts the selected cell position from parent/inner cell indices to an X/Y coordinate system.
+   * Uses a box size of 3 for calculations.
+   *
+   * @returns An object containing x and y coordinates of the selected cell, or null if no cell is selected.
+   * @returns {Object|null} position - The X/Y position
+   * @returns {number} position.x - The X coordinate in the flattened grid
+   * @returns {number} position.y - The Y coordinate in the flattened grid
+   */
   const getSelectedCellPositionXY = () => {
+    const boxSize = 3;
     const position = getSelectedCellPosition();
     if (position) {
       const { parentCellIndex, innerCellIndex } = position;
       const x =
-        Math.floor(parentCellIndex / 3) * 3 + Math.floor(innerCellIndex / 3);
-      const y = (parentCellIndex % 3) * 3 + (innerCellIndex % 3);
+        Math.floor(parentCellIndex / boxSize) * boxSize +
+        Math.floor(innerCellIndex / boxSize);
+      const y =
+        (parentCellIndex % boxSize) * boxSize + (innerCellIndex % boxSize);
       return { x, y };
     }
     return null;
   };
 
+  /**
+   * Populates the game board with values from a 2D grid.
+   *
+   * @param grid - A 2D array of numbers representing the game board values
+   * @remarks
+   * - For non-zero values in the grid, the corresponding UI element is marked as "locked"
+   *   and displays the value
+   * - For zero values, the corresponding UI element remains empty
+   * - Uses the traverseBoard helper to iterate through all board positions
+   */
   const fillGrid = (grid: number[][]) => {
     traverseBoard((innerButton, row, col) => {
       const value = grid[row][col];
@@ -392,9 +603,21 @@ const Game = () => {
     });
   };
 
+  /**
+   * Captures the current state of the game board.
+   *
+   * Creates a 9x9 grid (represented as a 2D array) that reflects the current
+   * numeric values displayed in the game board UI. Each inner cell's value is
+   * extracted from the innerHTML of the corresponding button element.
+   *
+   * @returns {number[][]} A 9x9 2D array where each element represents
+   * the numeric value of a cell in the game board (0 if empty or invalid).
+   */
   const getBoardState = () => {
-    const boardState: number[][] = Array.from({ length: 9 }, () =>
-      Array(9).fill(0)
+    const amountOfCellsInParentCell = 9;
+    const boardState: number[][] = Array.from(
+      { length: amountOfCellsInParentCell },
+      () => Array(9).fill(0)
     );
     traverseBoard((innerButton, row, col) => {
       const value = parseInt(innerButton.innerHTML || "0");
@@ -403,6 +626,7 @@ const Game = () => {
     return boardState;
   };
 
+  // TODO: Write documentation once leaderboard is implemented
   const configureOverlay = (
     showOverlay: boolean = false,
     showLoadingOverlay: boolean = false,
@@ -429,6 +653,10 @@ const Game = () => {
     }
   };
 
+  // Time tracking counter
+  // This effect updates the timer every second once the game has started
+  // This is calculated by subtracting the timeStarted from the current time
+  // and dividing by 1000 to convert milliseconds to seconds
   useEffect(() => {
     if (!gameFinished) {
       const interval = setInterval(() => {
@@ -441,6 +669,9 @@ const Game = () => {
     }
   }, [gameFinished, timeStarted]);
 
+  // Handle keyboard input
+  // This effect listens for keydown events and handles number input, backspace, delete, and undo actions
+  // It also handles arrow key navigation between cells
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       const key = event.key;
@@ -471,10 +702,15 @@ const Game = () => {
           let { x, y } = position;
 
           // Calculate the new position based on arrow key
-          if (key === "ArrowUp") x = x - 1 < 0 ? 8 : x - 1;
-          if (key === "ArrowDown") x = x + 1 > 8 ? 0 : x + 1;
-          if (key === "ArrowLeft") y = y - 1 < 0 ? 8 : y - 1;
-          if (key === "ArrowRight") y = y + 1 > 8 ? 0 : y + 1;
+          const amountOfCellsInParentCellZeroIndexed = 8;
+          if (key === "ArrowUp")
+            x = x - 1 < 0 ? amountOfCellsInParentCellZeroIndexed : x - 1;
+          if (key === "ArrowDown")
+            x = x + 1 > amountOfCellsInParentCellZeroIndexed ? 0 : x + 1;
+          if (key === "ArrowLeft")
+            y = y - 1 < 0 ? amountOfCellsInParentCellZeroIndexed : y - 1;
+          if (key === "ArrowRight")
+            y = y + 1 > amountOfCellsInParentCellZeroIndexed ? 0 : y + 1;
 
           // Get the button at the new position
           const button = getInnerCellButton(x, y);

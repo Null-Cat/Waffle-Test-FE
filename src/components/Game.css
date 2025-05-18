@@ -148,10 +148,11 @@
 }
 
 .game-header > p {
-  font-size: calc(var(--font-size) * 1.5);
+  font-size: calc(var(--font-size) * 1.2);
   font-family: var(--title-font);
   font-weight: var(--title-font-weight);
   margin: 0;
+  color: var(--color-tone-3);
 }
 
 .timer {
