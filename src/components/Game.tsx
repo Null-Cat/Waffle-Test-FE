@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { EraserIcon, UndoIcon, ResetIcon, HintIcon, PauseIcon } from "./SVGs";
+import { EraserIcon, UndoIcon, ResetIcon, HintIcon, ExitIcon } from "./SVGs";
 import "./Game.css";
 
 interface PlayerAction {
@@ -925,11 +925,20 @@ const Game = () => {
             </span>
           </button>
           <button
-            className="input-button button-pause"
-            onClick={() => console.log("pause")}
+            className="input-button button-exit"
+            onClick={() => {
+              configureOverlay(true, false, true);
+              setGameFinished(true);
+              setTimer(0);
+              setTimeStarted(null);
+              setBoardID(0);
+              setUnsolvedBoard([]);
+              setDifficulty("");
+              fillGrid(Array.from({ length: 9 }, () => Array(9).fill(0)));
+            }}
           >
-            <span className="pause-icon">
-              <PauseIcon />
+            <span className="exit-icon">
+              <ExitIcon />
             </span>
           </button>
         </div>
