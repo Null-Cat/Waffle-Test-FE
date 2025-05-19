@@ -956,55 +956,62 @@ const Game = () => {
             </button>
           ))}
         </div>
-        <div className="game-inputs-special">
-          <button
-            className="input-button button-undo"
-            onClick={handleUndoAction}
-          >
-            <span className="undo-icon">
-              <UndoIcon />
-            </span>
-          </button>
-          <button
-            className="input-button button-erase"
-            onClick={() => {
-              if (selectedCell && !selectedCell.hasAttribute("data-locked")) {
-                handleNumberInput(0);
-              }
-            }}
-          >
-            <span className="erase-icon">
-              <EraserIcon />
-            </span>
-          </button>
-          <div className="hint-button-container">
-            <button className="input-button button-hint" onClick={handleHint}>
-              <span className="hint-icon">
-                <HintIcon />
+        <div className="game-inputs-special-container">
+          <div className="game-inputs-special">
+            <button
+              className="input-button button-undo"
+              onClick={handleUndoAction}
+            >
+              <span className="undo-icon">
+                <UndoIcon />
               </span>
             </button>
-            <div className="hint-counter" ref={hintCounterRef}>
-              {hintCount}
+            <button
+              className="input-button button-erase"
+              onClick={() => {
+                if (selectedCell && !selectedCell.hasAttribute("data-locked")) {
+                  handleNumberInput(0);
+                }
+              }}
+            >
+              <span className="erase-icon">
+                <EraserIcon />
+              </span>
+            </button>
+            <div className="hint-button-container">
+              <button className="input-button button-hint" onClick={handleHint}>
+                <span className="hint-icon">
+                  <HintIcon />
+                </span>
+              </button>
+              <div className="hint-counter" ref={hintCounterRef}>
+                {hintCount}
+              </div>
             </div>
           </div>
-          <button
-            className="input-button button-reset-board"
-            onClick={() => {
-              fillGrid(unsolvedBoard);
-              clearBoardHighlighting(true);
-              setActionHistory([]);
-              setSelectedCell(null);
-            }}
-          >
-            <span className="reset-icon">
-              <ResetIcon />
-            </span>
-          </button>
-          <button className="input-button button-exit" onClick={handleGameExit}>
-            <span className="exit-icon">
-              <ExitIcon />
-            </span>
-          </button>
+          <div className="game-inputs-special">
+            <button
+              className="input-button button-reset-board"
+              onClick={() => {
+                fillGrid(unsolvedBoard);
+                clearBoardHighlighting(true);
+                setActionHistory([]);
+                setSelectedCell(null);
+              }}
+            >
+              <span className="reset-icon">
+                <ResetIcon />
+              </span>
+            </button>
+            <button
+              className="input-button button-exit"
+              onClick={handleGameExit}
+            >
+              <span className="exit-icon">
+                <ExitIcon />
+              </span>
+            </button>
+          </div>
         </div>
       </div>
       <div className="overlay" ref={overlayRef}>
@@ -1047,7 +1054,7 @@ const Game = () => {
             </button>
           </div>
           <h2>Random</h2>
-          <p>Play a random board of random difficulty</p>
+          <p>Play a random board</p>
           <button
             className="input-button start-button"
             onClick={() => handleGameStart()}
