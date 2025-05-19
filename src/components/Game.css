@@ -129,7 +129,6 @@
   gap: 1rem;
   width: 100%;
   max-width: var(--board-size);
-  margin: 1rem auto;
 }
 
 .game-inputs-row {
@@ -147,12 +146,36 @@
   }
 }
 
+.button-number {
+  @media (max-width: 600px) {
+    font-size: calc(var(--font-size) * 1.5);
+    padding: 0.3rem 0.8rem;
+  }
+}
+
+.game-inputs-special-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+  gap: 1rem;
+  width: 100%;
+  max-width: var(--board-size);
+  @media (max-width: 600px) {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
 .game-inputs-special {
   display: flex;
   justify-content: center;
   align-items: center;
   flex-wrap: wrap;
   gap: 1rem;
+  @media (max-width: 600px) {
+    gap: 0.5rem;
+  }
 }
 
 .hint-button-container {
