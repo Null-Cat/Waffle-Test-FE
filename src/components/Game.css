@@ -133,6 +133,7 @@
   gap: 1rem;
   width: 100%;
   max-width: var(--board-size);
+  margin-top: 5px;
 }
 
 .game-inputs-row {
