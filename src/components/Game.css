@@ -196,6 +196,48 @@
   }
 }
 
+.button-reset-board {
+  background-color: var(--yellow);
+  color: white;
+  fill: white;
+  font-weight: bold;
+  border: 2px solid var(--yellow-tone-1);
+  border-bottom: 5px solid rgba(0, 0, 0, 0.1);
+}
+
+.button-reset-board:hover {
+  background-color: var(--yellow-tone-2);
+}
+
+.button-reset-board:active {
+  background-color: var(--yellow);
+  transform: translateY(1px);
+  border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.button-exit {
+  background-color: var(--red);
+  color: white;
+  fill: white;
+  font-weight: bold;
+  border: 2px solid var(--red-tone-1);
+  border-bottom: 5px solid rgba(0, 0, 0, 0.1);
+}
+
+.button-exit:hover {
+  background-color: var(--red-tone-2);
+}
+
+.button-exit:active {
+  background-color: var(--red);
+  transform: translateY(1px);
+  border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
 .game-header {
   display: flex;
   justify-content: space-between;
