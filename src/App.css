@@ -7,11 +7,18 @@
   --color-tone-6: #f6f7f8;
   --color-tone-7: #fff;
   --green: #6fb05c;
+  --green-tone-1: #4a7d3a;
+  --green-tone-2: #3a6f2a;
   --yellow: #e9ba3a;
+  --yellow-tone-1: #b58f2a;
+  --yellow-tone-2: #a77b2a;
   --opacity-50: rgba(255, 255, 255, 0.5);
   --easing: cubic-bezier(0.19, 1, 0.22, 1);
   --easing2: cubic-bezier(0.5, 0, 0, 1);
   --orange: #f5793a;
+  --red: #d70000;
+  --red-tone-1: #a70000;
+  --red-tone-2: #8a0000;
   --blue: #0037af;
   --game-width: 728px;
   --font-size: 20px;

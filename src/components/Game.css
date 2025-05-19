@@ -288,6 +288,7 @@
   justify-content: center;
   align-items: center;
   position: absolute;
+  width: calc(var(--board-size) * 0.8);
   background-color: white;
   border-radius: 12%;
   padding: 2rem;
@@ -305,7 +306,66 @@
   align-items: center;
   gap: 1rem;
   width: 100%;
-  padding-bottom: 3rem;
+  padding-bottom: 1rem;
+}
+
+.start-daily-buttons > button:nth-child(1) {
+  background-color: var(--green);
+  color: white;
+  font-weight: bold;
+  border: 2px solid var(--green-tone-1);
+  border-bottom: 5px solid rgba(0, 0, 0, 0.1);
+}
+
+.start-daily-buttons > button:nth-child(1):hover {
+  background-color: var(--green-tone-2);
+}
+
+.start-daily-buttons > button:nth-child(1):active {
+  background-color: var(--green);
+  transform: translateY(1px);
+  border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.start-daily-buttons > button:nth-child(2) {
+  background-color: var(--yellow);
+  color: white;
+  font-weight: bold;
+  border: 2px solid var(--yellow-tone-1);
+  border-bottom: 5px solid rgba(0, 0, 0, 0.1);
+}
+
+.start-daily-buttons > button:nth-child(2):hover {
+  background-color: var(--yellow-tone-2);
+}
+
+.start-daily-buttons > button:nth-child(2):active {
+  background-color: var(--yellow);
+  transform: translateY(1px);
+  border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.start-daily-buttons > button:nth-child(3) {
+  background-color: var(--red);
+  color: white;
+  font-weight: bold;
+  border: 2px solid var(--red-tone-1);
+  border-bottom: 5px solid rgba(0, 0, 0, 0.1);
+}
+
+.start-daily-buttons > button:nth-child(3):hover {
+  background-color: var(--red-tone-2);
+}
+.start-daily-buttons > button:nth-child(3):active {
+  background-color: var(--red);
+  transform: translateY(1px);
+  border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 .start-overlay > h1 {
@@ -314,6 +374,20 @@
   font-weight: 900;
   margin: 0;
   padding-bottom: 2rem;
+}
+
+.start-overlay > h1 > div {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  margin-left: 0.55rem;
+}
+
+.start-overlay > h1 > div > span > img {
+  width: 5rem;
+  height: 5rem;
 }
 
 .start-overlay > h2 {
@@ -334,6 +408,20 @@
 .start-button {
   color: black;
   font-size: calc(var(--font-size) * 1.1);
+}
+
+.random-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  fill: black;
+  gap: 0.5rem;
+}
+.random-icon > h3 {
+  font-size: calc(var(--font-size) * 1.2);
+  font-family: var(--title-font);
+  font-weight: var(--title-font-weight);
+  margin: 0;
 }
 
 .game-finished-overlay {

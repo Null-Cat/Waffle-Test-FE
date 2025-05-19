@@ -1,5 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { EraserIcon, UndoIcon, ResetIcon, HintIcon, ExitIcon } from "./SVGs";
+import {
+  EraserIcon,
+  UndoIcon,
+  ResetIcon,
+  HintIcon,
+  ExitIcon,
+  RandomIcon,
+} from "./SVGs";
 import "./Game.css";
 
 interface PlayerAction {
@@ -1005,7 +1012,15 @@ const Game = () => {
           </div>
         </div>
         <div className="start-overlay" ref={startOverlayRef}>
-          <h1>Welcome to Phil's Waffle Sudoku</h1>
+          <h1>
+            <div>
+              Waffle
+              <span>
+                <img src="/waffle.png" alt="Sudoku Logo" />
+              </span>{" "}
+              Sudoku
+            </div>
+          </h1>
           <h2>Daily Challenges</h2>
           <p>Climb the Daily Leaderboard</p>
           <div className="start-daily-buttons">
@@ -1034,7 +1049,10 @@ const Game = () => {
             className="input-button start-button"
             onClick={() => handleGameStart()}
           >
-            Cook me a Board
+            <span className="random-icon">
+              <RandomIcon />
+              <h3>Mix it up!</h3>
+            </span>
           </button>
         </div>
         <div className="game-finished-overlay" ref={gameFinishedOverlayRef}>
