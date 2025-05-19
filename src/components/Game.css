@@ -288,12 +288,16 @@
   justify-content: center;
   align-items: center;
   position: absolute;
+  max-width: 80vw;
   width: calc(var(--board-size) * 0.8);
   background-color: white;
   border-radius: 12%;
   padding: 2rem;
   border-bottom: 5px solid rgba(0, 0, 0, 0.1);
   animation: slide-in 0.5s var(--easing);
+  @media (max-width: 600px) {
+    border-radius: 6%;
+  }
 }
 
 .start-overlay[hide] {
@@ -383,6 +387,9 @@
   gap: 0.5rem;
   width: 100%;
   margin-left: 0.55rem;
+  @media (max-width: 600px) {
+    margin-left: 0;
+  }
 }
 
 .start-overlay > h1 > div > span > img {
