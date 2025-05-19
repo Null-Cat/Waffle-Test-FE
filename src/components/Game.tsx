@@ -83,7 +83,7 @@ const Game = () => {
       if (cell && !cell.hasAttribute("data-locked")) {
         cell.innerText = value ? value.toString() : "";
         setActionHistory((prevHistory) => prevHistory.slice(0, -1));
-        cell.removeAttribute("error");
+        selectInnerCell(cell);
         if (actionHistory[actionHistory.length - 2]) {
           selectInnerCell(actionHistory[actionHistory.length - 2].cell);
         } else {
