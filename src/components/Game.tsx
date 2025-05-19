@@ -42,6 +42,10 @@ const Game = () => {
   const [timeFinished, setTimeFinished] = useState<Date | null>(null);
 
   const hintCounterRef = useRef<HTMLDivElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
+  const loadingOverlayRef = useRef<HTMLDivElement>(null);
+  const startOverlayRef = useRef<HTMLDivElement>(null);
+  const gameFinishedOverlayRef = useRef<HTMLDivElement>(null);
 
   /**
    * Handles the click event on a cell button.
@@ -61,8 +65,6 @@ const Game = () => {
    *
    * If there's a previous action in the history after undoing, the cell from that action
    * will be selected. Otherwise, board highlighting is cleared and no cell is selected.
-   *
-   * @returns {void}
    */
   const handleUndoAction = () => {
     if (actionHistory.length > 0) {
@@ -90,15 +92,13 @@ const Game = () => {
    * @param number - The number to enter in the selected cell (0 represents clearing the cell)
    *
    * @remarks
-   * This function:
    * - Updates the selected cell with the new number if the cell is not locked
    * - Only updates if the number is different from the current value
    * - Adds the previous state to action history for undo functionality
-   * - Maintains selection on the cell after updating
    * - Checks if the board is complete after each input
    * - Triggers game completion flow when the board is filled correctly
    *
-   * @requires selectedCell - A DOM element reference to the currently selected cell
+   * @requires selectedCell - A HTML Button element reference to the currently selected cell
    * @requires setActionHistory - State setter function for tracking changes
    * @requires selectInnerCell - Function to handle cell selection UI
    * @requires configureOverlay - Function to control the game overlay
@@ -127,7 +127,7 @@ const Game = () => {
         return !cellButton.hasAttribute("error") && cellValue !== "";
       });
       if (isBoardComplete) {
-        configureOverlay(true, true, false);
+        manageOverlayVisibility(true, true, false);
         handleGameFinish();
       }
     }
@@ -143,7 +143,9 @@ const Game = () => {
    * - Filling the grid with zeros (9x9 empty grid)
    */
   const handleGameExit = () => {
-    configureOverlay(true, false, true);
+    manageOverlayVisibility(true, false, true);
+    clearBoardHighlighting(true);
+    setSelectedCell(null);
     setGameFinished(true);
     setTimer(0);
     setTimeStarted(null);
@@ -166,8 +168,6 @@ const Game = () => {
    *
    * @remarks
    * This function makes an API call to the backend for board validation.
-   *
-   * @returns {void}
    */
   const handleGameFinish = () => {
     setTimeFinished(new Date());
@@ -184,7 +184,7 @@ const Game = () => {
     })
       .then((response) => {
         if (response.ok) {
-          configureOverlay(true, false, false, true);
+          manageOverlayVisibility(true, false, false, true);
           return;
         }
         return response.json();
@@ -210,7 +210,6 @@ const Game = () => {
    *                    Otherwise, a daily puzzle of the specified difficulty is fetched.
    *
    * @remarks
-   * This function performs the following operations:
    * - Resets cell selection and board highlighting
    * - Resets timer and game history
    * - Shows loading overlay
@@ -231,11 +230,11 @@ const Game = () => {
       url = new URL(`${baseAPIURL}/daily`);
       url.searchParams.append("difficulty", difficulty);
     }
-    configureOverlay(true, true, false);
+    manageOverlayVisibility(true, true, false);
     fetch(url)
       .then((response) => {
         if (!response.ok) {
-          configureOverlay(true, false, true);
+          manageOverlayVisibility(true, false, true);
           return response.json().then((data) => {
             console.error("Error fetching board:", data.message);
             return;
@@ -250,12 +249,12 @@ const Game = () => {
         );
         setUnsolvedBoard(data.value);
         fillGrid(data.value);
-        configureOverlay(false, false, false);
+        manageOverlayVisibility(false, false, false);
         setGameFinished(false);
       })
       .catch((error) => {
         console.error("Error fetching board:", error);
-        configureOverlay(true, false, true);
+        manageOverlayVisibility(true, false, true);
       });
   };
 
@@ -268,8 +267,6 @@ const Game = () => {
    * If hints are available, decrements the hint count and makes an API request to get a hint.
    * Upon successful response, the hint value is placed in the specified cell, the cell is locked,
    * the unsolved board state is updated, and the cell is selected.
-   *
-   * @throws Will log an error to the console if the hint fetch request fails.
    *
    * @remarks
    * - Modifies game unsolvedBoard
@@ -287,6 +284,17 @@ const Game = () => {
       return;
     }
     setHintCount(hintCount - 1);
+    //Get first empty cell from getBoardState
+    const rowCount = 9;
+    const emptyCellIndex = getBoardState(false).flat().indexOf(0);
+    const emptyCellButton = getInnerCellButton(
+      emptyCellIndex / rowCount,
+      emptyCellIndex % rowCount
+    );
+    if (emptyCellButton) {
+      emptyCellButton.innerHTML = "?";
+      selectInnerCell(emptyCellButton);
+    }
     fetch(`${baseAPIURL}/hint`, {
       method: "POST",
       headers: {
@@ -335,8 +343,8 @@ const Game = () => {
    * @param innerCellToSelect - The HTML button element representing the cell to be selected
    *
    * @remarks
-   * This function uses DOM manipulation to apply visual highlighting by setting attributes
-   * on elements. It relies on the following attributes:
+   * This function uses HTML Attributes to apply visual highlighting by setting the relevant
+   * attributes on the button elements. The attributes include:
    * - "selected": For the currently selected cell
    * - "selected-related": For cells related to the selection (same row/column/box)
    * - "selected-related-number": For cells with the same number as the selected cell
@@ -470,7 +478,7 @@ const Game = () => {
         }
       });
 
-    // Highlight Same Number in the same cell aka Errors
+    // Highlight duplicate numbers in the selected cells aka Errors
     const highlightedCellNumbers = Array.from(
       document.querySelectorAll("[selected], [selected-related]")
     )
@@ -742,30 +750,55 @@ const Game = () => {
   };
 
   // TODO: Write documentation once leaderboard is implemented
-  const configureOverlay = (
+  const manageOverlayVisibility = (
     showOverlay: boolean = false,
     showLoadingOverlay: boolean = false,
     showStartOverlay: boolean = false,
     showGameFinishedOverlay: boolean = false
   ) => {
-    const overlay = document.querySelector(".overlay") as HTMLElement;
-    const loadingOverlay = document.querySelector(
-      ".overlay-loading"
-    ) as HTMLElement;
-    const startOverlay = document.querySelector(
-      ".start-overlay"
-    ) as HTMLElement;
-    const gameFinishedOverlay = document.querySelector(
-      ".game-finished-overlay"
-    ) as HTMLElement;
-    if (overlay && loadingOverlay && startOverlay) {
-      overlay.style.display = showOverlay ? "flex" : "none";
-      loadingOverlay.style.display = showLoadingOverlay ? "flex" : "none";
-      startOverlay.style.display = showStartOverlay ? "flex" : "none";
-      gameFinishedOverlay.style.display = showGameFinishedOverlay
-        ? "flex"
-        : "none";
+    if (
+      overlayRef.current &&
+      loadingOverlayRef.current &&
+      startOverlayRef.current &&
+      gameFinishedOverlayRef.current
+    ) {
+      const overlays = [
+        { ref: overlayRef.current, show: showOverlay },
+        { ref: loadingOverlayRef.current, show: showLoadingOverlay },
+        { ref: startOverlayRef.current, show: showStartOverlay },
+        { ref: gameFinishedOverlayRef.current, show: showGameFinishedOverlay },
+      ];
+
+      for (const { ref, show } of overlays) {
+        if (show) {
+          ref.style.display = "flex";
+        } else {
+          if (ref.style.display === "none") return;
+          applyHideAnimation(ref);
+        }
+      }
     }
+  };
+
+  /**
+   * Applies a hide animation to an HTML element and hides it when the animation completes.
+   *
+   * This function adds a "hide" attribute to trigger a CSS animation. When the animation
+   * ends, it removes the attribute and sets the element's display to "none".
+   *
+   * @param element - The HTML element to hide with animation
+   */
+  const applyHideAnimation = (element: HTMLElement) => {
+    element.setAttribute("hide", "");
+
+    element.addEventListener(
+      "animationend",
+      () => {
+        element.removeAttribute("hide");
+        element.style.display = "none";
+      },
+      { once: true }
+    );
   };
 
   // Time tracking counter
@@ -964,14 +997,14 @@ const Game = () => {
           </button>
         </div>
       </div>
-      <div className="overlay">
-        <div className="overlay-loading">
+      <div className="overlay" ref={overlayRef}>
+        <div className="overlay-loading" ref={loadingOverlayRef}>
           <img className="throbber" src="/waffle.png" alt="Loading..." />
           <div className="loading-text">
             <h2>Baking...</h2>
           </div>
         </div>
-        <div className="start-overlay">
+        <div className="start-overlay" ref={startOverlayRef}>
           <h1>Welcome to Phil's Waffle Sudoku</h1>
           <h2>Daily Challenges</h2>
           <p>Climb the Daily Leaderboard</p>
@@ -1004,7 +1037,7 @@ const Game = () => {
             Cook me a Board
           </button>
         </div>
-        <div className="game-finished-overlay">
+        <div className="game-finished-overlay" ref={gameFinishedOverlayRef}>
           <h1>Congratulations!</h1>
           <h2>You have completed the board</h2>
           <p>
@@ -1018,7 +1051,7 @@ const Game = () => {
           </p>
           <button
             className="input-button start-button"
-            onClick={() => configureOverlay(true, false, true)}
+            onClick={() => manageOverlayVisibility(true, false, true)}
           >
             Return to the Kitchen
           </button>
