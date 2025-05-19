@@ -291,9 +291,9 @@ const Game = () => {
       return;
     }
     setHintCount(hintCount - 1);
-    //Get first empty cell from getBoardState
+    const preBoardState = getBoardState(false);
     const rowCount = 9;
-    const emptyCellIndex = getBoardState(false).flat().indexOf(0);
+    const emptyCellIndex = preBoardState.flat().indexOf(0);
     const emptyCellButton = getInnerCellButton(
       emptyCellIndex / rowCount,
       emptyCellIndex % rowCount
@@ -309,7 +309,7 @@ const Game = () => {
       },
       body: JSON.stringify({
         boardID: boardID,
-        board: getBoardState(),
+        board: preBoardState,
       }),
     })
       .then((response) => response.json())
