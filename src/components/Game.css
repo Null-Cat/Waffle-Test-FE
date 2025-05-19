@@ -84,16 +84,18 @@
   color: black;
 }
 
-.cell-button:hover {
-  background-color: var(--color-tone-5);
-}
+@media (hover: hover) {
+  .cell-button:hover {
+    background-color: var(--color-tone-5);
+  }
 
-.cell-button:hover[selected] {
-  background-color: rgb(71, 173, 207);
-}
+  .cell-button:hover[selected] {
+    background-color: rgb(71, 173, 207);
+  }
 
-.cell-button:hover[selected-related] {
-  background-color: lightblue;
+  .cell-button:hover[selected-related] {
+    background-color: lightblue;
+  }
 }
 
 .input-button {
@@ -117,8 +119,10 @@
   touch-action: manipulation;
 }
 
-.input-button:hover {
-  background-color: var(--color-tone-5);
+@media (hover: hover) {
+  .input-button:hover {
+    background-color: var(--color-tone-5);
+  }
 }
 
 .game-inputs {
@@ -228,8 +232,10 @@
   border-bottom: 5px solid rgba(0, 0, 0, 0.1);
 }
 
-.button-reset-board:hover {
-  background-color: var(--yellow-tone-2);
+@media (hover: hover) {
+  .button-reset-board:hover {
+    background-color: var(--yellow-tone-2);
+  }
 }
 
 .button-reset-board:active {
@@ -249,8 +255,10 @@
   border-bottom: 5px solid rgba(0, 0, 0, 0.1);
 }
 
-.button-exit:hover {
-  background-color: var(--red-tone-2);
+@media (hover: hover) {
+  .button-exit:hover {
+    background-color: var(--red-tone-2);
+  }
 }
 
 .button-exit:active {
@@ -386,8 +394,10 @@
   border-bottom: 5px solid rgba(0, 0, 0, 0.1);
 }
 
-.start-daily-buttons > button:nth-child(1):hover {
-  background-color: var(--green-tone-2);
+@media (hover: hover) {
+  .start-daily-buttons > button:nth-child(1):hover {
+    background-color: var(--green-tone-2);
+  }
 }
 
 .start-daily-buttons > button:nth-child(1):active {
@@ -406,8 +416,10 @@
   border-bottom: 5px solid rgba(0, 0, 0, 0.1);
 }
 
-.start-daily-buttons > button:nth-child(2):hover {
-  background-color: var(--yellow-tone-2);
+@media (hover: hover) {
+  .start-daily-buttons > button:nth-child(2):hover {
+    background-color: var(--yellow-tone-2);
+  }
 }
 
 .start-daily-buttons > button:nth-child(2):active {
@@ -426,8 +438,10 @@
   border-bottom: 5px solid rgba(0, 0, 0, 0.1);
 }
 
-.start-daily-buttons > button:nth-child(3):hover {
-  background-color: var(--red-tone-2);
+@media (hover: hover) {
+  .start-daily-buttons > button:nth-child(3):hover {
+    background-color: var(--red-tone-2);
+  }
 }
 .start-daily-buttons > button:nth-child(3):active {
   background-color: var(--red);
