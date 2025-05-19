@@ -127,17 +127,7 @@ const Game = () => {
       }
       selectInnerCell(selectedCell);
 
-      // Submit the board to the server if the game is finished
-      const isBoardComplete = Array.from(
-        document.querySelectorAll(".cell-button")
-      ).every((cellButton) => {
-        const cellValue = cellButton.innerHTML;
-        return !cellButton.hasAttribute("error") && cellValue !== "";
-      });
-      if (isBoardComplete) {
-        manageOverlayVisibility(true, true, false);
-        handleGameFinish();
-      }
+      submitBoard();
     }
   };
 
@@ -331,6 +321,7 @@ const Game = () => {
             cellButton.setAttribute("data-locked", "");
             setUnsolvedBoard(getBoardState(false));
             selectInnerCell(cellButton);
+            submitBoard();
           }
           setObtainingHint(false);
         }
@@ -511,6 +502,26 @@ const Game = () => {
           cell.setAttribute("error", "");
         }
       });
+    }
+  };
+
+  /**
+   * Validates the game board for completion and handles the end of the game.
+   *
+   * Checks if all cells on the board are filled and error-free by examining
+   * all elements with the "cell-button" class. If the board is complete,
+   * displays the completion overlay and triggers the game finish handler.
+   */
+  const submitBoard = () => {
+    const isBoardComplete = Array.from(
+      document.querySelectorAll(".cell-button")
+    ).every((cellButton) => {
+      const cellValue = cellButton.innerHTML;
+      return !cellButton.hasAttribute("error") && cellValue !== "";
+    });
+    if (isBoardComplete) {
+      manageOverlayVisibility(true, true, false);
+      handleGameFinish();
     }
   };
 
@@ -788,7 +799,7 @@ const Game = () => {
         if (show) {
           ref.style.display = "flex";
         } else {
-          if (ref.style.display === "none") return;
+          if (getComputedStyle(ref).display === "none") continue;
           applyHideAnimation(ref);
         }
       }

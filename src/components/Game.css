@@ -356,6 +356,10 @@
   animation: fade-in 0.5s var(--easing);
 }
 
+.overlay-loading[hide] {
+  animation: fade-out 0.5s var(--easing);
+}
+
 .start-overlay {
   display: flex;
   flex-direction: column;
@@ -504,6 +508,7 @@
   fill: black;
   gap: 0.5rem;
 }
+
 .random-icon > h3 {
   font-size: calc(var(--font-size) * 1.2);
   font-family: var(--title-font);
@@ -516,6 +521,7 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  position: absolute;
   background-color: white;
   border-radius: 12%;
   padding: 2rem;
@@ -535,7 +541,7 @@
   font-family: var(--title-font);
   font-weight: 900;
   margin: 0;
-  padding-bottom: 2rem;
+  padding-bottom: 1rem;
 }
 
 .game-finished-overlay > h2 {
@@ -584,7 +590,11 @@
   0% {
     transform: translateY(0);
   }
+  50% {
+    opacity: 1;
+  }
   100% {
     transform: translateY(-200%);
+    opacity: 0;
   }
 }
