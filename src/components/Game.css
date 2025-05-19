@@ -506,6 +506,9 @@
   padding: 2rem;
   border-bottom: 5px solid rgba(0, 0, 0, 0.1);
   animation: slide-in 0.5s var(--easing);
+  @media (max-width: 600px) {
+    border-radius: 12px;
+  }
 }
 
 .game-finished-overlay[hide] {

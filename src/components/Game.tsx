@@ -47,6 +47,7 @@ const Game = () => {
   const [gameFinished, setGameFinished] = useState(true);
   const [timeStarted, setTimeStarted] = useState<Date | null>(null);
   const [timeFinished, setTimeFinished] = useState<Date | null>(null);
+  const [obtainingHint, setObtainingHint] = useState(false);
 
   const hintCounterRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -293,6 +294,8 @@ const Game = () => {
       );
       return;
     }
+    if (obtainingHint) return;
+    setObtainingHint(true);
     setHintCount(hintCount - 1);
     const preBoardState = getBoardState(false);
     const rowCount = 9;
@@ -329,10 +332,12 @@ const Game = () => {
             setUnsolvedBoard(getBoardState(false));
             selectInnerCell(cellButton);
           }
+          setObtainingHint(false);
         }
       })
       .catch((error) => {
         console.error("Error fetching hint:", error);
+        setObtainingHint(false);
       });
   };
 
@@ -1067,7 +1072,7 @@ const Game = () => {
         </div>
         <div className="game-finished-overlay" ref={gameFinishedOverlayRef}>
           <h1>Congratulations!</h1>
-          <h2>You have completed the board</h2>
+          <h2>You've Solved it!</h2>
           <p>
             {`Time taken: ${formatTime(
               Math.floor(
