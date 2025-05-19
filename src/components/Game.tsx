@@ -266,17 +266,20 @@ const Game = () => {
   };
 
   /**
-   * Handles the user request for a hint in the game.
+   * Handles the hint functionality for the game.
    *
-   * If the user has no hints left (hintCount <= 0), applies a horizontal shaking animation
-   * to the hint counter element to indicate that no hints are available.
-   *
-   * If hints are available, decrements the hint count and makes an API request to get a hint.
-   * Upon successful response, the hint value is placed in the specified cell, the cell is locked,
-   * the unsolved board state is updated, and the cell is selected.
+   * When triggered, this function:
+   * 1. Checks if hints are available and shakes the hint counter if none left
+   * 2. Decrements the hint count if available
+   * 3. Identifies an empty cell in the current board
+   * 4. Temporarily marks it with "?" while requesting hint data
+   * 5. Sends a request to the backend API to fetch a hint
+   * 6. Updates the selected cell with the hint value from the API
+   * 7. Locks the cell (to prevent further editing)
+   * 8. Updates the unsolved board state
    *
    * @remarks
-   * - Modifies game unsolvedBoard
+   * - Makes an API call to the backend
    */
   const handleHint = () => {
     if (hintCount <= 0) {
@@ -295,7 +298,7 @@ const Game = () => {
     const rowCount = 9;
     const emptyCellIndex = preBoardState.flat().indexOf(0);
     const emptyCellButton = getInnerCellButton(
-      emptyCellIndex / rowCount,
+      Math.floor(emptyCellIndex / rowCount),
       emptyCellIndex % rowCount
     );
     if (emptyCellButton) {
