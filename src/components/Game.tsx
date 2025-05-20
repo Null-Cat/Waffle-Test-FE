@@ -1052,7 +1052,7 @@ const Game = () => {
             </div>
           </h1>
           <h2>Daily Challenges</h2>
-          <p>Climb the Daily Leaderboard</p>
+          <p>Try your best!</p>
           <div className="start-daily-buttons">
             <button
               className="input-button start-button"
