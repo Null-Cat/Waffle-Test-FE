@@ -73,3 +73,5 @@ npm run start
 ```
 
 The game connects to a backend API for puzzle generation, hint requests, and solution verification.
+
+[Waffle Sudoku Backend](https://github.com/Null-Cat/Waffle-Test-BE/)
