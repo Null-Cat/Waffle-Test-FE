@@ -2,7 +2,7 @@
 
 ![Waffle Sudoku Logo](/public/waffle.png)
 
-A modern, feature-rich Sudoku game built with React and TypeScript.
+A Sudoku game built with React and TypeScript.
 
 ## 🎮 Key Features
 
