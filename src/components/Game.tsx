@@ -54,6 +54,7 @@ const Game = () => {
   const loadingOverlayRef = useRef<HTMLDivElement>(null);
   const startOverlayRef = useRef<HTMLDivElement>(null);
   const gameFinishedOverlayRef = useRef<HTMLDivElement>(null);
+  const howToPlayOverlayRef = useRef<HTMLDivElement>(null);
 
   /**
    * Handles the click event on a cell button.
@@ -780,19 +781,22 @@ const Game = () => {
     showOverlay: boolean = false,
     showLoadingOverlay: boolean = false,
     showStartOverlay: boolean = false,
-    showGameFinishedOverlay: boolean = false
+    showGameFinishedOverlay: boolean = false,
+    showHowToPlayOverlay: boolean = false
   ) => {
     if (
       overlayRef.current &&
       loadingOverlayRef.current &&
       startOverlayRef.current &&
-      gameFinishedOverlayRef.current
+      gameFinishedOverlayRef.current &&
+      howToPlayOverlayRef.current
     ) {
       const overlays = [
         { ref: overlayRef.current, show: showOverlay },
         { ref: loadingOverlayRef.current, show: showLoadingOverlay },
         { ref: startOverlayRef.current, show: showStartOverlay },
         { ref: gameFinishedOverlayRef.current, show: showGameFinishedOverlay },
+        { ref: howToPlayOverlayRef.current, show: showHowToPlayOverlay },
       ];
 
       for (const { ref, show } of overlays) {
@@ -1080,6 +1084,17 @@ const Game = () => {
               <h3>Mix it up!</h3>
             </span>
           </button>
+          <div className="spacer"></div>
+          <h2>How to Play</h2>
+          <p>Learn how to play Sudoku</p>
+          <button
+            className="input-button start-button"
+            onClick={() =>
+              manageOverlayVisibility(true, false, false, false, true)
+            }
+          >
+            Show me!
+          </button>
         </div>
         <div className="game-finished-overlay" ref={gameFinishedOverlayRef}>
           <h1>Congratulations!</h1>
@@ -1098,6 +1113,24 @@ const Game = () => {
             onClick={() => manageOverlayVisibility(true, false, true)}
           >
             Return to the Kitchen
+          </button>
+        </div>
+        <div className="how-to-play-overlay" ref={howToPlayOverlayRef}>
+          <h1>How to Play</h1>
+          <p>
+            Fill the grid with numbers from 1 to 9, ensuring that each number
+            appears only once in each row, column, and 3x3 box.
+          </p>
+          <p>
+            Use the buttons (or keyboard) to input numbers, erase mistakes, and
+            get hints. Happy puzzling!
+          </p>
+          <button
+            className="input-button"
+            onClick={() => manageOverlayVisibility(true, false, true)}
+            style={{ color: "black" }}
+          >
+            Got it!
           </button>
         </div>
       </div>
