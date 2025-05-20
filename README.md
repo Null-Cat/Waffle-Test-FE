@@ -52,6 +52,10 @@ Built with:
 - TypeScript
 - Vite
 
+### Project Management
+
+[Plane Kanban Board](https://plane.philipwhite.dev/spaces/issues/cf8346bdf96f4e1c87b1951c9fec2706)
+
 ## 🚀 Getting Started
 
 ```bash
