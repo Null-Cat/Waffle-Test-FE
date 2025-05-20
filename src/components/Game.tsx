@@ -776,7 +776,15 @@ const Game = () => {
     return boardState;
   };
 
-  // TODO: Write documentation once leaderboard is implemented
+  /**
+   * Manages the visibility of various overlays in the game.
+   *
+   * @param showOverlay - Whether to show the main overlay
+   * @param showLoadingOverlay - Whether to show the loading overlay
+   * @param showStartOverlay - Whether to show the start overlay
+   * @param showGameFinishedOverlay - Whether to show the game finished overlay
+   * @param showHowToPlayOverlay - Whether to show the how-to-play overlay
+   */
   const manageOverlayVisibility = (
     showOverlay: boolean = false,
     showLoadingOverlay: boolean = false,
