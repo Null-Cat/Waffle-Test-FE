@@ -1,54 +1,71 @@
-# React + TypeScript + Vite
+# Waffle Test Submission Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+![Waffle Sudoku Logo](/public/waffle.png)
 
-Currently, two official plugins are available:
+A modern, feature-rich Sudoku game built with React and TypeScript.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🎮 Key Features
 
-## Expanding the ESLint configuration
+### Game Modes
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **Daily Challenges**: Play the daily puzzle in Easy, Medium, or Hard difficulty
+- **Random Puzzles**: Generate random Sudoku boards for unlimited play
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+### Gameplay Features
+
+- **Timer**: Track your solving speed with an integrated timer
+- **Hints System**: Use hints when you're stuck (limited quantity per game)
+- **Smart Highlighting**:
+  - Row, column, and box highlighting for better visibility
+  - Error detection and highlighting for rule violations
+  - Same-number highlighting across the board
+- **Input Options**:
+  - On-screen number pad
+  - Full keyboard support
+  - Arrow key navigation between cells
+
+### Quality of Life
+
+- **Undo Function**: Revert mistakes with the undo button or Ctrl+Z
+- **Reset Board**: Start over without losing the current puzzle
+- **Eraser Tool**: Quickly remove numbers from cells or Backspace
+
+### UI/UX
+
+- **Responsive Design**: Works on both desktop and mobile devices
+- **Visual Feedback**: Animations for locked cells, hints, and errors
+- **How to Play Guide**: Built-in instructions for new players
+
+## 🎲 How to Play
+
+1. Select a daily challenge difficulty or a random puzzle
+2. Fill the 9×9 grid with numbers 1-9
+3. Each row, column, and 3×3 box must contain all numbers 1-9 without repetition
+4. Use hints if you get stuck
+5. Complete the puzzle as quickly as possible!
+
+## 💻 Technical Details
+
+Built with:
+
+- React 19
+- TypeScript
+- Vite
+
+## 🚀 Getting Started
+
+```bash
+# Install dependencies
+npm install
+
+# Run development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Start production server
+npm run start
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+The game connects to a backend API for puzzle generation, hint requests, and solution verification.
